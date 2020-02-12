@@ -12,19 +12,23 @@
 
 // these functions should move to THCNumerics
 
-inline __host__ __device__ THHalf fmaxType(THHalf x, THHalf y) {
+inline __host__ __device__ THHalf fmaxType(THHalf x, THHalf y) 
+{
   return THCNumerics<THHalf>::ge(x, y) ? x : y;
 }
 
-inline __host__ __device__ float fmaxType(float x, THHalf y) {
+inline __host__ __device__ float fmaxType(float x, THHalf y) 
+{
   return fmaxf(x, ScalarConvert<THHalf, float>::to(y));
 }
 
-inline __host__ __device__ float fmaxType(float x, float y) {
+inline __host__ __device__ float fmaxType(float x, float y) 
+{
   return fmaxf(x, y);
 }
 
-inline __host__ __device__ double fmaxType(double x, double y) {
+inline __host__ __device__ double fmaxType(double x, double y) 
+{
   return fmax(x, y);
 }
 

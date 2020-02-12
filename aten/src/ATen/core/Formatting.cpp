@@ -15,7 +15,8 @@ std::ostream& operator<<(std::ostream & out, Backend b) {
 namespace at {
 
 //not all C++ compilers have default float so we define our own here
-inline std::ios_base& defaultfloat(std::ios_base& __base) {
+inline std::ios_base& defaultfloat(std::ios_base& __base) 
+{
   __base.unsetf(std::ios_base::floatfield);
   return __base;
 }

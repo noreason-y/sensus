@@ -21,37 +21,46 @@ inline void KernelFunction::make_boxed_function(OperatorKernel*, const OperatorH
     func(opHandle, stack);
 }
 
-inline OperatorKernel* KernelFunction::getFunctor_() const {
-    if (functor_.get() == nullptr) {
-        if (!functorFactory_) {
-        return nullptr;
-        }
-        functor_ = functorFactory_();
+inline OperatorKernel* KernelFunction::getFunctor_() const 
+{
+  if (functor_.get() == nullptr) 
+  {
+    if (!functorFactory_) 
+    {
+      return nullptr;
     }
-    return functor_.get();
+    functor_ = functorFactory_();
+  }
+  return functor_.get();
 }
 
-
-inline bool KernelFunction::isValid() const {
-    // TODO We want to introduce the invariant that all kernels must be callable in a boxed way, then this should only check boxed_kernel_func_.
-    return boxed_kernel_func_ != nullptr || unboxed_kernel_func_ != nullptr;
+inline bool KernelFunction::isValid() const 
+{
+  // TODO We want to introduce the invariant that all kernels must be callable in a boxed way, then this should only check boxed_kernel_func_.
+  return boxed_kernel_func_ != nullptr || unboxed_kernel_func_ != nullptr;
 }
 
-inline bool KernelFunction::isFallthrough() const {
-    return boxed_kernel_func_ == &fallthrough_kernel;
+inline bool KernelFunction::isFallthrough() const 
+{
+  return boxed_kernel_func_ == &fallthrough_kernel;
 }
 
-inline void KernelFunction::callBoxed(const OperatorHandle& opHandle, Stack* stack) const {
-    if (C10_UNLIKELY(boxed_kernel_func_ == nullptr)) {
-        if (unboxed_kernel_func_ == nullptr) {
-            TORCH_INTERNAL_ASSERT(false, "Tried to call KernelFunction::callBoxed() on an uninitialized KernelFunction.");
-        } else {
-            // TODO We want to introduce the invariant that all kernels must be callable in a boxed way, then this case should be impossible.
-            TORCH_INTERNAL_ASSERT(false, "Tried to call KernelFunction::callBoxed() on a KernelFunction that can only be called with KernelFunction::callUnboxed().");
-        }
+inline void KernelFunction::callBoxed(const OperatorHandle& opHandle, Stack* stack) const 
+{
+  if (C10_UNLIKELY(boxed_kernel_func_ == nullptr)) 
+  {
+    if (unboxed_kernel_func_ == nullptr) 
+    {
+      TORCH_INTERNAL_ASSERT(false, "Tried to call KernelFunction::callBoxed() on an uninitialized KernelFunction.");
+    } 
+    else 
+    {
+      // TODO We want to introduce the invariant that all kernels must be callable in a boxed way, then this case should be impossible.
+      TORCH_INTERNAL_ASSERT(false, "Tried to call KernelFunction::callBoxed() on a KernelFunction that can only be called with KernelFunction::callUnboxed().");
     }
+  }
 
-    (*boxed_kernel_func_)(getFunctor_(), opHandle, stack);
+  (*boxed_kernel_func_)(getFunctor_(), opHandle, stack);
 }
 
 template<class Return, class... Args>
@@ -71,13 +80,14 @@ inline Return KernelFunction::callUnboxed(const OperatorHandle& opHandle, Args..
 }
 
 template<KernelFunction::BoxedKernelFunction* func>
-inline KernelFunction KernelFunction::makeFromBoxedFunction() {
-    return KernelFunction(
-        nullptr,  // no functorFactory_, this can only be called in a boxed way.
-        nullptr,  // no functor_ object either
-        &make_boxed_function<func>,
-        nullptr  // no unboxed function pointer
-    );
+inline KernelFunction KernelFunction::makeFromBoxedFunction() 
+{
+  return KernelFunction(
+    nullptr,  // no functorFactory_, this can only be called in a boxed way.
+    nullptr,  // no functor_ object either
+    &make_boxed_function<func>,
+    nullptr  // no unboxed function pointer
+  );
 }
 
 inline KernelFunction KernelFunction::makeFallthrough() {

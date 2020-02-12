@@ -7,7 +7,8 @@ namespace impl {
 class OperatorEntry;
 }
 
-enum class AliasAnalysisKind : uint8_t {
+enum class AliasAnalysisKind : uint8_t 
+{
   INTERNAL_SPECIAL_CASE,
   CONSERVATIVE, // The most conservative alias analysis type, assumes
                 // side-effects. This is the default analysis.

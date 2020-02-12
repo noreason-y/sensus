@@ -17,6 +17,7 @@ struct Module;
 }
 } // namespace jit
 } // namespace torch
+
 namespace c10 {
 template<class Key, class Value> class Dict;
 template<class T> class List;
@@ -40,6 +41,7 @@ struct PyObjectHolder;
 // to mark whether that type is a subtype of c10::intrusive_ptr_target and needs
 // retain/release calls.
 
+//TODO: ?????
 #define TORCH_FORALL_TAGS(_) \
   _(None) \
   _(Tensor) \

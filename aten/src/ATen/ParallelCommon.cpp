@@ -20,19 +20,25 @@ namespace at {
 namespace {
 
 const char* get_env_var(
-    const char* var_name, const char* def_value = nullptr) {
+    const char* var_name, const char* def_value = nullptr) 
+{
   const char* value = std::getenv(var_name);
   return value ? value : def_value;
 }
 
-size_t get_env_num_threads(const char* var_name, size_t def_value = 0) {
-  try {
-    if (auto* value = std::getenv(var_name)) {
+size_t get_env_num_threads(const char* var_name, size_t def_value = 0) 
+{
+  try 
+  {
+    if (auto* value = std::getenv(var_name)) 
+    {
       int nthreads = c10::stoi(value);
       TORCH_CHECK(nthreads > 0);
       return nthreads;
     }
-  } catch (const std::exception& e) {
+  } 
+  catch (const std::exception& e) 
+  {
     std::ostringstream oss;
     oss << "Invalid " << var_name << " variable value, " << e.what();
     TORCH_WARN(oss.str());
@@ -42,7 +48,8 @@ size_t get_env_num_threads(const char* var_name, size_t def_value = 0) {
 
 } // namespace
 
-std::string get_parallel_info() {
+std::string get_parallel_info() 
+{
   std::ostringstream ss;
 
   ss << "ATen/Parallel:\n\tat::get_num_threads() : "

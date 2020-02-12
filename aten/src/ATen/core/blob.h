@@ -27,15 +27,18 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
    * Initializes an empty Blob.
    */
   Blob() noexcept : meta_(), pointer_(nullptr), has_ownership_(false) {}
-  ~Blob() {
+  ~Blob() 
+  {
     Reset();
   }
 
-  Blob(Blob&& other) noexcept : Blob() {
+  Blob(Blob&& other) noexcept : Blob() 
+  {
     swap(other);
   }
 
-  Blob& operator=(Blob&& other) noexcept {
+  Blob& operator=(Blob&& other) noexcept 
+  {
     Blob(std::move(other)).swap(*this);
     return *this;
   }
@@ -44,21 +47,24 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
    * Checks if the content stored in the blob is of type T.
    */
   template <class T>
-  bool IsType() const noexcept {
+  bool IsType() const noexcept 
+  {
     return meta_.Match<T>();
   }
 
   /**
    * Returns the meta info of the blob.
    */
-  const TypeMeta& meta() const noexcept {
+  const TypeMeta& meta() const noexcept 
+  {
     return meta_;
   }
 
   /**
    * Returns a printable typename of the blob.
    */
-  c10::string_view TypeName() const noexcept {
+  c10::string_view TypeName() const noexcept 
+  {
     return meta_.name();
   }
 
@@ -68,7 +74,8 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
    */
   // TODO(jerryzh): add a Get(DeviceType) function?
   template <class T>
-  const T& Get() const {
+  const T& Get() const 
+  {
     AT_ASSERTM(
         IsType<T>(),
         "wrong type for the Blob instance. Blob contains ",
@@ -81,10 +88,13 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
     return *static_cast<const T*>(pointer_);
   }
 
-  const void* GetRaw() const noexcept {
+  const void* GetRaw() const noexcept 
+  {
     return pointer_;
   }
-  void* GetRaw() noexcept {
+
+  void* GetRaw() noexcept 
+  {
     return pointer_;
   }
 
@@ -97,14 +107,19 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
    * Reset().
    */
   template <class T>
-  T* GetMutable() {
+  T* GetMutable() 
+  {
     static_assert(
         std::is_default_constructible<T>::value,
         "GetMutable can't be called with non-default-constructible types. "
         "Try using specialized methods");
-    if (IsType<T>()) {
+
+    if (IsType<T>()) 
+    {
       return static_cast<T*>(pointer_);
-    } else {
+    } 
+    else 
+    {
       // TODO Re-enable logging
       // VLOG(1) << "Create new mutable object " << TypeMeta::TypeName<T>();
       return Reset<T>(new T());
@@ -112,10 +127,14 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
   }
 
   template <class T>
-  T* GetMutableOrNull() {
-    if (IsType<T>()) {
+  T* GetMutableOrNull() 
+  {
+    if (IsType<T>()) 
+    {
       return static_cast<T*>(pointer_);
-    } else {
+    } 
+    else 
+    {
       return nullptr;
     }
   }
@@ -129,7 +148,8 @@ class CAFFE2_API Blob final : public c10::intrusive_ptr_target {
    * complex initializations needs to be done outside the blob.
    */
   template <class T>
-  T* Reset(T* allocated) {
+  T* Reset(T* allocated) 
+  {
     free_();
     meta_ = TypeMeta::Make<T>();
     pointer_ = static_cast<void*>(allocated);

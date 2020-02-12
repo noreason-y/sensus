@@ -22,17 +22,18 @@ using valid_dict_key_types = guts::typelist::typelist<
   std::string,
   double,
   bool,
-  at::Tensor
->;
+  at::Tensor>;
 }
 
 namespace detail {
 
-struct DictKeyHash {
+struct DictKeyHash 
+{
   size_t operator()(const IValue& ivalue) const;
 };
 
-struct DictKeyEqualTo {
+struct DictKeyEqualTo 
+{
   bool operator()(const IValue& lhs, const IValue& rhs) const {
     return impl::shallowEquals(lhs, rhs);
   }

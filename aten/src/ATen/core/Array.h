@@ -8,15 +8,20 @@
 namespace at { namespace detail {
 
 template <typename T, int size>
-struct alignas(16) Array {
+struct alignas(16) Array 
+{
   T data[size];
 
-  C10_HOST_DEVICE T operator[](int i) const {
+  C10_HOST_DEVICE T operator[](int i) const 
+  {
     return data[i];
   }
-  C10_HOST_DEVICE T& operator[](int i) {
+
+  C10_HOST_DEVICE T& operator[](int i) 
+  {
     return data[i];
   }
+
 #ifdef __HIP_PLATFORM_HCC__
   C10_HOST_DEVICE Array() = default;
   C10_HOST_DEVICE Array(const Array&) = default;
@@ -28,11 +33,13 @@ struct alignas(16) Array {
 #endif
 
   // Fill the array with x.
-  C10_HOST_DEVICE Array(T x) {
-    for (int i = 0; i < size; i++) {
+  C10_HOST_DEVICE Array(T x) 
+  {
+    for (int i = 0; i < size; i++) 
+    {
       data[i] = x;
     }
   }
 };
 
-}}
+}} // namespace at::detail
