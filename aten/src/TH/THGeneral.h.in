@@ -83,8 +83,9 @@ typedef void (*THErrorHandlerFunction)(const char *msg, void *data);
 typedef void (*THArgErrorHandlerFunction)(int argNumber, const char *msg, void *data);
 
 #define TH_DESC_BUFF_LEN 64
-typedef struct {
-    char str[TH_DESC_BUFF_LEN];
+typedef struct 
+{
+  char str[TH_DESC_BUFF_LEN];
 } THDescBuff;
 
 

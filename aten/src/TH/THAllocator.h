@@ -71,13 +71,15 @@ protected:
 };
 
 // Base-from-member idiom
-struct CAFFE2_API THRefcountedMapAllocatorArgCheck {
+struct CAFFE2_API THRefcountedMapAllocatorArgCheck 
+{
   THRefcountedMapAllocatorArgCheck(int flags);
 };
 
 class CAFFE2_API THRefcountedMapAllocator
     : private THRefcountedMapAllocatorArgCheck,
-      public THMapAllocator {
+      public THMapAllocator 
+{
  public:
   THRefcountedMapAllocator(const char *filename, int flags, size_t size);
   THRefcountedMapAllocator(WithFd, const char *filename, int fd, int flags, size_t size);
@@ -94,7 +96,7 @@ class CAFFE2_API THRefcountedMapAllocator
 
   virtual ~THRefcountedMapAllocator() { close(); }
 
-protected:
+ protected:
   void checkFlags();
   void initializeAlloc();
 };

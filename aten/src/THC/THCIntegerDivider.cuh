@@ -61,7 +61,8 @@ struct DivMod {
 // Base case: we only have an implementation for uint32_t for now.  For
 // everything else, we use plain division.
 template <typename Value>
-struct IntDivider {
+struct IntDivider 
+{
   IntDivider() { }  // Dummy constructor for arrays.
   IntDivider(Value d) : divisor(d) { }
 

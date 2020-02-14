@@ -11,21 +11,25 @@
 
 // Returns a Tensor given a TensorImpl. The TensorImpl remains valid after the
 // the Tensor is destroyed.
-inline at::Tensor THTensor_wrap(THTensor* tensor) {
+inline at::Tensor THTensor_wrap(THTensor* tensor) 
+{
   c10::raw::intrusive_ptr::incref(tensor);
   return at::Tensor(c10::intrusive_ptr<at::TensorImpl>::reclaim(tensor));
 }
 
-inline const int64_t* THTensor_getSizePtr(THTensor* tensor) {
+inline const int64_t* THTensor_getSizePtr(THTensor* tensor) 
+{
   return tensor->sizes().data();
 }
 
-inline const int64_t* THTensor_getStridePtr(THTensor* tensor) {
+inline const int64_t* THTensor_getStridePtr(THTensor* tensor)
+{
   return tensor->strides().data();
 }
 
 // NB: Non-retaining
-inline THStorage* THTensor_getStoragePtr(const THTensor* tensor) {
+inline THStorage* THTensor_getStoragePtr(const THTensor* tensor) 
+{
   // Within PyTorch, the invariant is that storage_ is always
   // initialized; we never have tensors that don't have any storage.
   // However, for Caffe2, this is not true, because they have permitted
@@ -47,29 +51,41 @@ inline THStorage* THTensor_getStoragePtr(const THTensor* tensor) {
 //                            and tensors with a dimension of size zero are collapsed to 0-dimensional tensors.
 //
 // Eventually, everything should go through nDimension or tensor->dim().
-inline int THTensor_nDimension(const THTensor* tensor) {
+inline int THTensor_nDimension(const THTensor* tensor) 
+{
   return tensor->dim();
 }
 
-inline int THTensor_nDimensionLegacyNoScalars(const THTensor* tensor) {
-  if (tensor->dim() == 0) {
+inline int THTensor_nDimensionLegacyNoScalars(const THTensor* tensor) 
+{
+  if (tensor->dim() == 0) 
+  {
     return 1;
-  } else {
+  } 
+  else 
+  {
     return tensor->dim();
   }
 }
 
-inline int THTensor_nDimensionLegacyAll(const THTensor* tensor) {
-  if (tensor->is_empty()) {
+inline int THTensor_nDimensionLegacyAll(const THTensor* tensor) 
+{
+  if (tensor->is_empty()) 
+  {
     return 0;
-  } else if (tensor->dim() == 0) {
+  } 
+  else if (tensor->dim() == 0) 
+  {
     return 1;
-  } else {
+  } 
+  else 
+  {
     return tensor->dim();
   }
 }
 
-inline int64_t THTensor_strideLegacyNoScalars(const THTensor *self, int dim) {
+inline int64_t THTensor_strideLegacyNoScalars(const THTensor *self, int dim) 
+{
   THArgCheck((dim >= 0) && (dim < THTensor_nDimensionLegacyNoScalars(self)), 2, "dimension %d out of range of %dD tensor",
       dim, THTensor_nDimensionLegacyNoScalars(self));
   return self->dim() == 0 ? 1 : self->stride(dim);
@@ -88,18 +104,26 @@ inline int64_t THTensor_sizeLegacyNoScalars(const THTensor *self, int dim)
 #include <TH/generic/THTensorFastGetSet.hpp>
 #include <TH/THGenerateBFloat16Type.h>
 
-inline std::vector<int64_t> THTensor_sizesLegacyNoScalars(const THTensor *self) {
-  if (self->dim() == 0) {
+inline std::vector<int64_t> THTensor_sizesLegacyNoScalars(const THTensor *self) 
+{
+  if (self->dim() == 0) 
+  {
     return {1};
-  } else {
+  } 
+  else 
+  {
     return self->sizes().vec();
   }
 }
 
-inline std::vector<int64_t> THTensor_stridesLegacyNoScalars(const THTensor *self) {
-  if (self->dim() == 0) {
+inline std::vector<int64_t> THTensor_stridesLegacyNoScalars(const THTensor *self) 
+{
+  if (self->dim() == 0) 
+  {
     return {1};
-  } else {
+  } 
+  else 
+  {
     return self->strides().vec();
   }
 }

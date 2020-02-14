@@ -9,7 +9,8 @@ namespace nn {
 
 ELUImpl::ELUImpl(const ELUOptions& options_) : options(options_) {}
 
-Tensor ELUImpl::forward(Tensor input) {
+Tensor ELUImpl::forward(Tensor input) 
+{
   return F::detail::elu(input, options.alpha(), options.inplace());
 }
 
@@ -17,7 +18,8 @@ void ELUImpl::reset() {}
 
 void ELUImpl::pretty_print(std::ostream& stream) const {
   stream << "torch::nn::ELU(alpha=" << options.alpha();
-  if (options.inplace()) {
+  if (options.inplace()) 
+  {
     stream << std::boolalpha  << ", inplace=" << options.inplace();
   }
   stream << ")";
@@ -27,15 +29,18 @@ void ELUImpl::pretty_print(std::ostream& stream) const {
 
 SELUImpl::SELUImpl(const SELUOptions& options_) : options(options_) {}
 
-Tensor SELUImpl::forward(Tensor input) {
+Tensor SELUImpl::forward(Tensor input) 
+{
   return F::detail::selu(input, options.inplace());
 }
 
 void SELUImpl::reset() {}
 
-void SELUImpl::pretty_print(std::ostream& stream) const {
+void SELUImpl::pretty_print(std::ostream& stream) const 
+{
   stream << "torch::nn::SELU(";
-  if (options.inplace()) {
+  if (options.inplace()) 
+  {
     stream << std::boolalpha << "inplace=" << options.inplace();
   }
   stream << ")";
@@ -46,13 +51,15 @@ void SELUImpl::pretty_print(std::ostream& stream) const {
 HardshrinkImpl::HardshrinkImpl(const HardshrinkOptions& options_)
     : options(options_) {}
 
-Tensor HardshrinkImpl::forward(const Tensor& input) {
+Tensor HardshrinkImpl::forward(const Tensor& input) 
+{
   return F::detail::hardshrink(input, options.lambda());
 }
 
 void HardshrinkImpl::reset() {}
 
-void HardshrinkImpl::pretty_print(std::ostream& stream) const {
+void HardshrinkImpl::pretty_print(std::ostream& stream) const 
+{
   stream << std::boolalpha
          << "torch::nn::Hardshrink(" << options.lambda() << ")";
 }
@@ -64,16 +71,19 @@ HardtanhImpl::HardtanhImpl(const HardtanhOptions& options_)
   reset();
 }
 
-Tensor HardtanhImpl::forward(Tensor input) {
+Tensor HardtanhImpl::forward(Tensor input) 
+{
   return F::detail::hardtanh(input, options.min_val(), options.max_val(), options.inplace());
 }
 
-void HardtanhImpl::reset() {
+void HardtanhImpl::reset() 
+{
   TORCH_CHECK(options.max_val() > options.min_val(),
               "max_val must be greater than min_val");
 }
 
-void HardtanhImpl::pretty_print(std::ostream& stream) const {
+void HardtanhImpl::pretty_print(std::ostream& stream) const 
+{
   stream << std::boolalpha
          << "torch::nn::Hardtanh(min_val=" << options.min_val()
          << ", max_val=" << options.max_val();

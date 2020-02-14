@@ -7,7 +7,8 @@
 
 namespace c10 {
 
-struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
+struct C10_API StorageImpl final : public c10::intrusive_ptr_target 
+{
  public:
   StorageImpl(
       caffe2::TypeMeta data_type,
@@ -20,13 +21,18 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
         numel_(numel),
         resizable_(resizable),
         received_cuda_(false),
-        allocator_(allocator) {
-    if (resizable) {
+        allocator_(allocator) 
+  {
+    if (resizable) 
+    {
       AT_ASSERTM(
           allocator_, "For resizable storage, allocator must be provided");
     }
-    if (numel > 0) {
-      if (data_type_.id() == caffe2::TypeIdentifier::uninitialized()) {
+
+    if (numel > 0) 
+    {
+      if (data_type_.id() == caffe2::TypeIdentifier::uninitialized()) 
+      {
         AT_ERROR(
             "Constructing a storage with meta of unknown type and non-zero numel");
       }
@@ -43,7 +49,8 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
             numel,
             allocator->allocate(data_type.itemsize() * numel),
             allocator,
-            resizable) {}
+            resizable) 
+  {}
 
   StorageImpl& operator=(StorageImpl&& other) = default;
   StorageImpl& operator=(const StorageImpl&) = delete;
@@ -52,20 +59,24 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
   StorageImpl(const StorageImpl&) = delete;
   ~StorageImpl() = default;
 
-  void reset() {
+  void reset() 
+  {
     data_ptr_.clear();
     numel_ = 0;
   }
 
   template <typename T>
-  inline bool IsType() const {
+  inline bool IsType() const 
+  {
     return data_type_.Match<T>();
   }
 
   template <typename T>
-  inline T* data() const {
+  inline T* data() const 
+  {
     auto data_type = caffe2::TypeMeta::Make<T>();
-    if (dtype() != data_type) {
+    if (dtype() != data_type) 
+    {
       AT_ERROR(
           "Attempt to access StorageImpl having data type ",
           dtype(),
@@ -76,19 +87,23 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
   }
 
   template <typename T>
-  inline T* unsafe_data() const {
+  inline T* unsafe_data() const 
+  {
     return static_cast<T*>(this->data_ptr_.get());
   }
 
-  void release_resources() override {
+  void release_resources() override 
+  {
     data_ptr_.clear();
   }
 
-  size_t itemsize() const {
+  size_t itemsize() const 
+  {
     return data_type_.itemsize();
   }
 
-  size_t capacity() const {
+  size_t capacity() const 
+  {
     return numel_ * itemsize();
   }
 
@@ -122,14 +137,16 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
   // XXX: TERRIBLE! DONT USE UNLESS YOU HAVE TO! AND EVEN THEN DONT, JUST DONT!
   // Setting the data_type will require you to audit many other parts of the
   // struct again to make sure it's still valid.
-  void set_dtype(const caffe2::TypeMeta& data_type) {
+  void set_dtype(const caffe2::TypeMeta& data_type) 
+  {
     int64_t capacity = numel_ * data_type_.itemsize();
     data_type_ = data_type;
     numel_ = capacity / data_type_.itemsize();
   }
 
   // TODO: Return const ptr eventually if possible
-  void* data() {
+  void* data() 
+  {
     return data_ptr_.get();
   }
 
@@ -180,7 +197,8 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
       void* src,
       const caffe2::TypeMeta& data_type,
       size_t capacity,
-      DeleterFnPtr d = nullptr) {
+      DeleterFnPtr d = nullptr) 
+  {
     UniqueStorageShareExternalPointer(
         at::DataPtr(src, src, d, data_ptr_.device()), data_type, capacity);
   }
@@ -191,7 +209,8 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
   void UniqueStorageShareExternalPointer(
       at::DataPtr&& data_ptr,
       const caffe2::TypeMeta& data_type,
-      size_t capacity) {
+      size_t capacity) 
+  {
     data_type_ = data_type;
     // TODO: Use CAFFE_ENFORCE_WITH_CALLER equivalent
     // For now causes lots of redefine issues if caffe2/core/logging.h is used
@@ -217,7 +236,8 @@ struct C10_API StorageImpl final : public c10::intrusive_ptr_target {
     received_cuda_ = received_cuda;
   }
 
-  bool received_cuda() {
+  bool received_cuda() 
+  {
     return received_cuda_;
   }
 

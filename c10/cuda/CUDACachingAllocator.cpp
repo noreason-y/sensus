@@ -162,8 +162,8 @@ static std::string format_size(uint64_t size) {
 
 } // namespace
 
-class THCCachingAllocator {
-
+class THCCachingAllocator 
+{
  private:
 
   // lock around all operations
@@ -188,7 +188,6 @@ class THCCachingAllocator {
   std::deque<std::pair<cudaEvent_t, Block*>> cuda_events;
 
  public:
-
   THCCachingAllocator() :
       large_blocks(BlockComparator),
       small_blocks(BlockComparator) {}
@@ -664,13 +663,15 @@ class THCCachingAllocator {
     // and retries.
     cudaError_t err = cudaMalloc(devPtr, size);
 
-    if (err != cudaSuccess) {
+    if (err != cudaSuccess) 
+    {
       DeviceStats& stats = get_stats_for_device(device);
       stats.num_alloc_retries += 1;
       cudaGetLastError();  // reset the last CUDA error
       free_cached_blocks(device);
       err = cudaMalloc(devPtr, size);
-      if (err != cudaSuccess) {
+      if (err != cudaSuccess) 
+      {
         return err;
       }
     }

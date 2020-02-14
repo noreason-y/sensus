@@ -18,7 +18,8 @@ template<typename T>
 inline T __device__ curand_uniform_type(curandStatePhilox4_32_10_t *state);
 
 template <>
-inline THHalf __device__ curand_uniform_type<THHalf>(curandStatePhilox4_32_10_t *state) {
+inline THHalf __device__ curand_uniform_type<THHalf>(curandStatePhilox4_32_10_t *state) 
+{
   auto rand = curand_uniform4(state);
   return ScalarConvert<float, THHalf>::to(rand.x);
 }

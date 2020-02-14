@@ -3,7 +3,8 @@
 #include <THC/THCGeneral.h>
 
 /* Global state of THC. */
-struct THCState {
+struct THCState 
+{
   /* Set of all allocated resources. */
   THCCudaResourcesPerDevice* resourcesPerDevice;
   /* Captured number of devices upon startup; convenience for bounds checking */

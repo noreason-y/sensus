@@ -63,11 +63,13 @@ struct AtomicAddIntegerImpl<T, 4> {
     uint32_t newval;
     uint32_t assumed;
 
-    do {
+    do 
+    {
       assumed = old;
       newval = val +  (T)old;
       old = atomicCAS(address_as_ui, assumed, newval);
-    } while (assumed != old);
+    } 
+    while (assumed != old);
   }
 };
 

@@ -38,7 +38,8 @@ void validate_outputs(
 static constexpr int NO_DEVICE = -2;
 
 // GraphTask holds metadata needed for a single execution of backward()
-struct GraphTask {
+struct GraphTask 
+{
   // Indicates if an error occurred while executing any task.  When this is
   // true, it signals all threads to stop executing.
   std::atomic_bool has_error_;
@@ -53,15 +54,18 @@ struct GraphTask {
   std::unordered_map<Node*, InputBuffer> not_ready_;
   std::unordered_map<Node*, int> dependencies_;
 
-  struct ExecInfo {
-    struct Capture {
+  struct ExecInfo 
+  {
+    struct Capture 
+    {
       Capture(int input_idx, int output_idx)
           : input_idx_(input_idx), output_idx_(output_idx) {}
       int input_idx_; // within Node inputs
       int output_idx_; // within the output vector of a GraphTask
     };
 
-    bool should_execute() const {
+    bool should_execute() const 
+    {
       return needed_ || captures_;
     }
 
@@ -76,8 +80,7 @@ struct GraphTask {
   // without synchronization
   std::unordered_map<Node*, ExecInfo> exec_info_;
   std::vector<Variable> captured_vars_;
-  std::shared_ptr<at::ThreadLocalDebugInfoBase> debug_info_ =
-      at::getThreadLocalDebugInfo();
+  std::shared_ptr<at::ThreadLocalDebugInfoBase> debug_info_ = at::getThreadLocalDebugInfo();
   std::unordered_set<c10::Stream> leaf_streams;
 
   void init_to_execute(Node& graph_root, const edge_list& outputs);
@@ -89,7 +92,8 @@ struct GraphTask {
   // The number of parent graph tasks for this graph task
   const int reentrant_depth_;
 
-  bool can_checkpoint() {
+  bool can_checkpoint() 
+  {
     return exec_info_.empty();
   }
 
@@ -121,7 +125,8 @@ struct GraphTask {
         future_result_(std::make_shared<FutureVariableList>()) {}
 };
 
-struct NodeTask {
+struct NodeTask 
+{
   std::weak_ptr<GraphTask> base_;
   std::shared_ptr<Node> fn_;
   // This buffer serves as an implicit "addition" node for all of the
@@ -142,12 +147,14 @@ struct NodeTask {
       : base_(base),
         fn_(std::move(fn)),
         inputs_(std::move(inputs)),
-        isShutdownTask_(isShutdownTask) {}
+        isShutdownTask_(isShutdownTask) 
+  {}
 };
 
 // A single instance of this struct should be created through the whole process lifetime.
 // The worker thread creation logic and Engine's destructor rely on this.
-struct TORCH_API Engine {
+struct TORCH_API Engine 
+{
   /// Returns a reference to a static `Engine` instance.
   static Engine& get_default_engine();
 
@@ -187,7 +194,8 @@ struct TORCH_API Engine {
   // network for execution.
   void enqueue_blocked_task_on_cpu(NodeTask task);
 
-  virtual std::unique_ptr<AnomalyMetadata> make_anomaly_metadata() {
+  virtual std::unique_ptr<AnomalyMetadata> make_anomaly_metadata() 
+  {
     return nullptr;
   }
 
@@ -228,7 +236,8 @@ struct TORCH_API Engine {
   // How many nested reentrant calls are allowed until a new thread is used
   int max_recursion_depth_;
 
-  struct ThreadPoolShared {
+  struct ThreadPoolShared 
+  {
     // Data structures used by the threads for executing reentrant backwards
     // tasks. See Note [Reentrant backwards]
     // Number of available threads for processing new GraphTasks.
@@ -243,18 +252,18 @@ struct TORCH_API Engine {
     std::queue<std::weak_ptr<GraphTask>> graphtasks_queue_;
 
     ThreadPoolShared() : num_workers_(0) {}
- };
+  };
 
- // Temporary workaround until shutting down threads is done
- // We need shared ownership of all these objects because the threads are leaked
- // when Engine shuts down, so there may be threads waiting on work_
- // for the graphtasks_queue_ to be nonempty.
- std::shared_ptr<ThreadPoolShared> thread_pool_shared_;
+  // Temporary workaround until shutting down threads is done
+  // We need shared ownership of all these objects because the threads are leaked
+  // when Engine shuts down, so there may be threads waiting on work_
+  // for the graphtasks_queue_ to be nonempty.
+  std::shared_ptr<ThreadPoolShared> thread_pool_shared_;
 
-private:
- variable_list graph_task_exec_post_processing(
-     const std::shared_ptr<GraphTask>& graph_task);
- void mark_graph_task_completed(std::shared_ptr<GraphTask>& graph_task);
+ private:
+  variable_list graph_task_exec_post_processing(
+      const std::shared_ptr<GraphTask>& graph_task);
+  void mark_graph_task_completed(std::shared_ptr<GraphTask>& graph_task);
 };
 
 // allow python_engine to override the default engine when it loads

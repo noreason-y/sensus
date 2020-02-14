@@ -927,13 +927,15 @@ void Engine::add_thread_pool_task(const std::weak_ptr<GraphTask>& graph_task) {
   thread_pool_shared_->work_.notify_one();
 }
 
-void GraphTask::init_to_execute(Node& graph_root, const edge_list& outputs) {
+void GraphTask::init_to_execute(Node& graph_root, const edge_list& outputs) 
+{
   exec_info_[&graph_root].needed_ = true;
 
   int output_idx = 0;
-  for (auto & output_edge : outputs) {
-    Node *output = output_edge.function.get();
-    auto & info = exec_info_[output];
+  for (auto& output_edge : outputs) 
+  {
+    Node* output = output_edge.function.get();
+    auto& info = exec_info_[output];
     if (!info.captures_)
       info.captures_ = make_unique<std::vector<ExecInfo::Capture>>();
     info.captures_->emplace_back(output_edge.input_nr, output_idx++);
@@ -947,15 +949,18 @@ void GraphTask::init_to_execute(Node& graph_root, const edge_list& outputs) {
   //     is_needed[fn] = any(compute_is_needed(next_edge)
   //                         for next_edge in fn.next_edges)
   //   return is_needed[fn]
-  struct Frame {
+  struct Frame 
+  {
     Frame (Node *fn) : fn_(fn), next_next_fn_(0) {}
-    Node *fn_;
+    Node* fn_;
     size_t next_next_fn_;
 
-    Node* get_next_fn() {
-      const auto & next = fn_->next_edges();
+    Node* get_next_fn() 
+    {
+      const auto& next = fn_->next_edges();
       auto num_next = next.size();
-      while (next_next_fn_ < num_next) {
+      while (next_next_fn_ < num_next) 
+      {
         auto fn = next[next_next_fn_++].function.get();
         if (fn) return fn;
       }
@@ -964,23 +969,31 @@ void GraphTask::init_to_execute(Node& graph_root, const edge_list& outputs) {
   };
   std::vector<Frame> stack;
   std::unordered_set<Node*> seen;
-  for (const auto & input : graph_root.next_edges()) {
+  for (const auto& input : graph_root.next_edges()) 
+  {
     if (seen.count(input.function.get()) > 0) continue;
     stack.emplace_back(input.function.get());
-    while (!stack.empty()) {
-      auto &frame = stack.back();
-      if (Node *next_fn = frame.get_next_fn()) {
-        if (/* bool unseen = */ seen.emplace(next_fn).second) {
+    while (!stack.empty()) 
+    {
+      auto& frame = stack.back();
+      if (Node* next_fn = frame.get_next_fn()) 
+      {
+        if (/* bool unseen = */ seen.emplace(next_fn).second) 
+        {
           stack.emplace_back(next_fn);
           continue; // recurse
         }
-      } else {
+      } 
+      else 
+      {
         // NB: if we were using real recursion we could have saved some lookups
         // using a return value from recursive call. It would make this manually unrolled
         // version a lot more complicated, so I skipped that.
-        const auto & next_edges = frame.fn_->next_edges();
+        const auto& next_edges = frame.fn_->next_edges();
         const bool needed = std::any_of(
-            next_edges.begin(), next_edges.end(), [&](const Edge& edge) {
+            next_edges.begin(), next_edges.end(), 
+            [&](const Edge& edge) 
+            {
               auto it = exec_info_.find(edge.function.get());
               return it != exec_info_.end() && it->second.should_execute();
             });

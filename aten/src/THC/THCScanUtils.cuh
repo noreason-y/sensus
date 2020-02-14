@@ -34,7 +34,8 @@ __device__ void inclusivePrefixScan(T *smem, BinaryOp binop) {
 #pragma unroll
   for (int stride = 1; stride < Power2ScanSize; stride <<= 1) {
     int index = (threadIdx.x + 1) * stride * 2 - 1;
-    if (index < Power2ScanSize) {
+    if (index < Power2ScanSize) 
+    {
       smem[index] = binop(smem[index], smem[index - stride]);
     }
     __syncthreads();

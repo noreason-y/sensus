@@ -28,14 +28,19 @@ __device__ __forceinline__ IndexType getLinearBlockId() {
 // then __syncthreads is needed either before or afterwards to prevent non-0
 // threads overriding smem in the next loop before num-0 thread reads from it.
 template <typename T, typename ReduceOp, int N>
-__device__ void reduceNValuesInBlock(T *smem,
-                             T threadVals[N],
-                             const unsigned int numVals,
-                             ReduceOp reduceOp,
-                             T init) {
-  if (numVals == 0) {
+__device__ 
+void reduceNValuesInBlock(
+    T *smem,
+    T threadVals[N],
+    const unsigned int numVals,
+    ReduceOp reduceOp,
+    T init) 
+{
+  if (numVals == 0) 
+  {
     #pragma unroll
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < N; ++i) 
+    {
       threadVals[i] = init;
     }
     return;
@@ -44,9 +49,11 @@ __device__ void reduceNValuesInBlock(T *smem,
   // We store each of the N values contiguously, so if N = 2, all values for
   // the first threadVal for each thread in the block are stored followed by
   // all of the values for the second threadVal for each thread in the block
-  if (threadIdx.x < numVals) {
+  if (threadIdx.x < numVals) 
+  {
     #pragma unroll
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < N; ++i) 
+    {
       smem[i * numVals + threadIdx.x] = threadVals[i];
     }
   }

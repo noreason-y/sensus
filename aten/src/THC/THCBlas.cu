@@ -9,12 +9,14 @@
 
 float THCudaBlas_Sdot(THCState *state, int64_t n, float *x, int64_t incx, float *y, int64_t incy)
 {
-  if (n == 1) {
+  if (n == 1) 
+  {
     incx = 1;
     incy = 1;
   }
 
-  if ((n <= INT_MAX) && (incx <= INT_MAX) && (incy <= INT_MAX)) {
+  if ((n <= INT_MAX) && (incx <= INT_MAX) && (incy <= INT_MAX)) 
+  {
     int i_n = (int)n;
     int i_incx = (int)incx;
     int i_incy = (int)incy;
@@ -29,14 +31,16 @@ float THCudaBlas_Sdot(THCState *state, int64_t n, float *x, int64_t incx, float 
   return 0;
 }
 
-double THCudaBlas_Ddot(THCState *state, int64_t n, double *x, int64_t incx, double *y, int64_t incy)
+double THCudaBlas_Ddot(THCState* state, int64_t n, double* x, int64_t incx, double* y, int64_t incy)
 {
-  if (n == 1) {
+  if (n == 1) 
+  {
     incx = 1;
     incy = 1;
   }
 
-  if ((n <= INT_MAX) && (incx <= INT_MAX) && (incy <= INT_MAX)) {
+  if ((n <= INT_MAX) && (incx <= INT_MAX) && (incy <= INT_MAX)) 
+  {
     int i_n = (int)n;
     int i_incx = (int)incx;
     int i_incy = (int)incy;

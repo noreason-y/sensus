@@ -16,38 +16,49 @@ namespace autograd {
 // TODO: Make the Python API above to just call this C++ API.
 variable_list _make_grads(
     const variable_list& outputs,
-    const variable_list& grad_outputs) {
+    const variable_list& grad_outputs) 
+{
   size_t num_tensors = outputs.size();
   size_t num_gradients = grad_outputs.size();
   variable_list new_grads;
   new_grads.reserve(num_tensors);
-  if (grad_outputs.empty()) {
-    for (const Variable& output : outputs) {
-      if (output.requires_grad()) {
+  if (grad_outputs.empty()) 
+  {
+    for (const Variable& output : outputs) 
+    {
+      if (output.requires_grad()) 
+      {
         TORCH_CHECK(
             output.numel() == 1,
             "grad can be implicitly created only for scalar outputs");
         new_grads.emplace_back(at::ones_like(output, LEGACY_CONTIGUOUS_MEMORY_FORMAT));
       }
     }
-  } else {
+  } 
+  else 
+  {
     TORCH_CHECK(
         num_tensors == num_gradients,
         "got %ld tensors and %ld "
         "gradients",
         num_tensors,
         num_gradients);
-    for (size_t i = 0; i < outputs.size(); ++i) {
+    for (size_t i = 0; i < outputs.size(); ++i) 
+    {
       const Variable& output = outputs[i];
       const Variable& grad_output = grad_outputs[i];
-      if (!grad_output.defined()) {
-        if (output.requires_grad()) {
+      if (!grad_output.defined()) 
+      {
+        if (output.requires_grad()) 
+        {
           TORCH_CHECK(
               output.numel() == 1,
               "grad can be implicitly created only for scalar outputs");
           new_grads.emplace_back(at::ones_like(output, LEGACY_CONTIGUOUS_MEMORY_FORMAT));
         }
-      } else {
+      } 
+      else 
+      {
         // grad output is defined, just append to the new_grads
         new_grads.emplace_back(grad_output);
       }

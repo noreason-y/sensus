@@ -17,12 +17,14 @@ namespace torch { namespace autograd {
 // AccumulateGrad sets sequence_nr to the max value so it's always called
 // ASAP during backwards.
 AccumulateGrad::AccumulateGrad(Variable variable_)
-    : Node(/*sequence_nr=*/UINT64_MAX)
-    , variable(std::move(variable_)) {
+: Node(/*sequence_nr=*/UINT64_MAX), 
+  variable(std::move(variable_)) 
+{
   add_input_metadata(variable);
 }
 
-auto AccumulateGrad::apply(variable_list&& grads) -> variable_list {
+auto AccumulateGrad::apply(variable_list&& grads) -> variable_list 
+{
   // XXX: this method is not thread-safe!
   check_input_variables("AccumulateGrad", grads, 1, 0);
 
@@ -34,17 +36,20 @@ auto AccumulateGrad::apply(variable_list&& grads) -> variable_list {
     return {};
 
   auto new_grad = std::move(grads[0]);
-  for (auto& hook : impl::hooks(variable)) {
+  for (auto& hook : impl::hooks(variable)) 
+  {
     new_grad = (*hook)({new_grad})[0];
   }
 
   at::Tensor& grad = variable.grad();
-  if (!grad.defined()) {
+  if (!grad.defined()) 
+  {
     // under following condition, we can avoid clone()
     if (!GradMode::is_enabled()
         && !new_grad.is_sparse()
         && new_grad.is_contiguous()
-        && new_grad.use_count() <= 1 + !post_hooks().empty()) {
+        && new_grad.use_count() <= 1 + !post_hooks().empty()) 
+    {
       // first check it is in first-order grad only mode
       // then check not sparse before is_contiguous
       // then check contiguous, otherwise later in place accumulation may fail
@@ -53,25 +58,35 @@ auto AccumulateGrad::apply(variable_list&& grads) -> variable_list {
       // call_function in Engine.cpp will temporarily bump the refcount by one, hence the
       // addition of !post_hooks().empty().
       variable.grad() = new_grad.detach();
-    } else {
-      if (new_grad.is_sparse()) {
+    } 
+    else 
+    {
+      if (new_grad.is_sparse()) 
+      {
         variable.grad() = new_grad.clone();
-      } else {
+      } 
+      else 
+      {
         variable.grad() = new_grad.clone(at::MemoryFormat::Contiguous);
       }
     }
-  } else if (!GradMode::is_enabled()) {
+  } 
+  else if (!GradMode::is_enabled()) 
+  {
     // This case is not strictly necessary, but it makes the first-order only case
     // slightly more efficient.
     Variable& grad_variable = as_variable_ref(grad);
-    if (grad_variable.is_sparse() && !new_grad.is_sparse()) {
+    if (grad_variable.is_sparse() && !new_grad.is_sparse()) 
+    {
       // If `grad_variable` is sparse and `new_grad` is not sparse, their sum is not
       // sparse, and we must change the TensorImpl type of `grad_variable` for it to
       // store the result. However, changing the TensorImpl type of a tensor requires
       // changing the tensor itself, and thus in this case we have to change the grad
       // tensor.
       grad_variable = new_grad + grad_variable;
-    } else {
+    } 
+    else 
+    {
       // In this case we can avoid changing the grad tensor. There are three scenarios
       // when we'll hit this case:
       //
@@ -84,7 +99,9 @@ auto AccumulateGrad::apply(variable_list&& grads) -> variable_list {
       // still referring to the same tensor after the operation.
       grad_variable += new_grad;
     }
-  } else {
+  } 
+  else 
+  {
     variable.grad() = grad + new_grad;
   }
 

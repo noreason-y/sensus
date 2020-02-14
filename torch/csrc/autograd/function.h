@@ -111,7 +111,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
 
   /// Evaluates the function on the given inputs and returns the result of the
   /// function call.
-  variable_list operator()(variable_list&& inputs) {
+  variable_list operator()(variable_list&& inputs) 
+  {
     RECORD_FUNCTION(
         this, std::vector<c10::IValue>(inputs.begin(), inputs.end()));
 
@@ -136,30 +137,35 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   uint32_t add_input_metadata(
     const at::TensorOptions& options
   , at::IntArrayRef shape
-  , at::Device device) noexcept {
+  , at::Device device) noexcept 
+  {
     uint32_t input_nr = input_metadata_.size();
     input_metadata_.emplace_back(options, shape, device);
     return input_nr;
   }
 
-  uint32_t add_input_metadata(const at::Tensor& t) noexcept {
+  uint32_t add_input_metadata(const at::Tensor& t) noexcept 
+  {
     uint32_t input_nr = input_metadata_.size();
     input_metadata_.emplace_back(t);
     return input_nr;
   }
 
   /// Adds a placeholder for an input that will not be used.
-  uint32_t add_input_metadata(undefined_input u) noexcept {
+  uint32_t add_input_metadata(undefined_input u) noexcept 
+  {
     uint32_t input_nr = input_metadata_.size();
     input_metadata_.emplace_back();
     return input_nr;
   }
 
-  uint32_t num_inputs() const noexcept {
+  uint32_t num_inputs() const noexcept 
+  {
     return input_metadata_.size();
   }
 
-  const InputMetadata& input_metadata(size_t index) const {
+  const InputMetadata& input_metadata(size_t index) const 
+  {
     return input_metadata_[index];
   }
 
@@ -172,33 +178,40 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
    * elements are on different devices (across multiple GPUs, for example)
    * they may have different streams.
    */
-  c10::optional<c10::Stream> stream(const c10::DeviceType device_type) {
-    for (const auto& metadata : input_metadata_) {
+  c10::optional<c10::Stream> stream(const c10::DeviceType device_type) 
+  {
+    for (const auto& metadata : input_metadata_) 
+    {
       if (metadata.device().type() == device_type) return metadata.stream();
     }
 
     return c10::nullopt;
   }
 
-  void clear_input_metadata() {
+  void clear_input_metadata() 
+  {
     input_metadata_.clear();
   }
 
   // Outputs ("Next Edges")
 
-  const Edge& next_edge(size_t index) const noexcept {
+  const Edge& next_edge(size_t index) const noexcept 
+  {
     return next_edges_[index];
   }
 
-  void set_next_edge(size_t index, Edge edge) {
+  void set_next_edge(size_t index, Edge edge) 
+  {
     next_edges_[index] = std::move(edge);
   }
 
-  void add_next_edge(Edge edge) {
+  void add_next_edge(Edge edge) 
+  {
     next_edges_.push_back(std::move(edge));
   }
 
-  void set_next_edges(edge_list&& next_edges) {
+  void set_next_edges(edge_list&& next_edges) 
+  {
     next_edges_ = std::move(next_edges);
   }
 
@@ -206,11 +219,13 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
     return next_edges_;
   }
 
-  edge_list& next_edges() noexcept {
+  edge_list& next_edges() noexcept 
+  {
     return next_edges_;
   }
 
-  uint32_t num_outputs() const noexcept {
+  uint32_t num_outputs() const noexcept 
+  {
     return next_edges_.size();
   }
 
@@ -218,7 +233,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   /// The sequence number of this `Node`.
-  uint64_t sequence_nr() const noexcept {
+  uint64_t sequence_nr() const noexcept 
+  {
     return sequence_nr_;
   }
 
@@ -227,15 +243,19 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
 
   /// Returns true if the particular output edge is active, and that particular
   /// output of this function should be computed.
-  bool should_compute_output(size_t output_edge_index) const {
+  bool should_compute_output(size_t output_edge_index) const 
+  {
     TORCH_CHECK(output_edge_index < num_outputs(), "Index out of range");
     return next_edges_[output_edge_index].is_valid();
   }
 
   /// Returns true if any of the output edges in any of the ranges are active.
-  bool should_compute_output(std::initializer_list<IndexRange> idxs) const {
-    return std::any_of(idxs.begin(), idxs.end(), [this](IndexRange range) {
-      for (auto i = range.first; i < range.second; i++) {
+  bool should_compute_output(std::initializer_list<IndexRange> idxs) const 
+  {
+    return std::any_of(idxs.begin(), idxs.end(), [this](IndexRange range) 
+    {
+      for (auto i = range.first; i < range.second; i++) 
+      {
         if (should_compute_output(i))
           return true;
       }
@@ -245,12 +265,14 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
 
   /// Returns the `PyObject` stored for this `Node` (for Python
   /// interaction).
-  PyObject* pyobj() const noexcept {
+  PyObject* pyobj() const noexcept 
+  {
     return pyobj_;
   }
 
   /// Sets the `PyObject` stored for this `Node` (for Python interaction).
-  void set_pyobj(PyObject* pyobj) noexcept {
+  void set_pyobj(PyObject* pyobj) noexcept 
+  {
     pyobj_ = pyobj;
   }
 
@@ -261,22 +283,26 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   // Hook API
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  uintptr_t add_post_hook(std::unique_ptr<FunctionPostHook>&& post_hook) {
+  uintptr_t add_post_hook(std::unique_ptr<FunctionPostHook>&& post_hook) 
+  {
     post_hooks_.push_back(std::move(post_hook));
     // Use the raw pointer as the unique key to identify this hook. This key
     // can then be used in del_post_hook(key) to remove this hook.
     return reinterpret_cast<std::uintptr_t>(post_hooks_.back().get());
   }
 
-  const std::vector<std::unique_ptr<FunctionPostHook>>& post_hooks() const
-      noexcept {
+  const std::vector<std::unique_ptr<FunctionPostHook>>& post_hooks() const noexcept 
+  {
     return post_hooks_;
   }
 
   // delete a post hook matching the key
-  bool del_post_hook(const uintptr_t& key) {
-    for (auto it = post_hooks_.begin(); it != post_hooks_.end(); ++it) {
-      if (key == reinterpret_cast<std::uintptr_t>(it->get())) {
+  bool del_post_hook(const uintptr_t& key) 
+  {
+    for (auto it = post_hooks_.begin(); it != post_hooks_.end(); ++it) 
+    {
+      if (key == reinterpret_cast<std::uintptr_t>(it->get())) 
+      {
         post_hooks_.erase(it);
         return true;
       }
@@ -284,20 +310,23 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
     return false;
   }
 
-  std::vector<std::unique_ptr<FunctionPostHook>>& post_hooks() noexcept {
+  std::vector<std::unique_ptr<FunctionPostHook>>& post_hooks() noexcept 
+  {
     return post_hooks_;
   }
 
-  void add_pre_hook(std::unique_ptr<FunctionPreHook>&& pre_hook) {
+  void add_pre_hook(std::unique_ptr<FunctionPreHook>&& pre_hook) 
+  {
     pre_hooks_.push_back(std::move(pre_hook));
   }
 
-  const std::vector<std::unique_ptr<FunctionPreHook>>& pre_hooks() const
-      noexcept {
+  const std::vector<std::unique_ptr<FunctionPreHook>>& pre_hooks() const noexcept 
+  {
     return pre_hooks_;
   }
 
-  std::vector<std::unique_ptr<FunctionPreHook>>& pre_hooks() noexcept {
+  std::vector<std::unique_ptr<FunctionPreHook>>& pre_hooks() noexcept 
+  {
     return pre_hooks_;
   }
 
@@ -315,7 +344,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   /// Returns true if this function is traceable. An op is traceable if all
   /// operations happening within `apply()` are performed on autograd
   /// `Variables` (i.e. apply mostly instantiates and applies other functions).
-  virtual bool is_traceable() {
+  virtual bool is_traceable() 
+  {
     return false;
   }
 
@@ -328,7 +358,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   /// non-traceable but state passing could be considered transparent. This
   /// will probably depend on saved_variable_list being mutable.
   /// NOTE: this value matters only if is_traceable() returns false.
-  virtual bool passes_state_transparently() {
+  virtual bool passes_state_transparently() 
+  {
     return false;
   }
 
@@ -356,9 +387,11 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
 };
 
 /// See Node::is_traceable() for definition.
-struct TraceableFunction : public Node {
+struct TraceableFunction : public Node 
+{
   using Node::Node;
-  bool is_traceable() final {
+  bool is_traceable() final 
+  {
     return true;
   }
 };
@@ -367,15 +400,21 @@ struct TraceableFunction : public Node {
 //                       Associated Free Nodes
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-namespace detail {
+namespace detail 
+{
 // Implementation of `collect_next_edges` (see below).
-struct MakeNextFunctionList : IterArgs<MakeNextFunctionList> {
+struct MakeNextFunctionList : IterArgs<MakeNextFunctionList> 
+{
   edge_list next_edges;
   using IterArgs<MakeNextFunctionList>::operator();
-  void operator()(const Variable& variable) {
-    if (variable.defined()) {
+  void operator()(const Variable& variable) 
+  {
+    if (variable.defined()) 
+    {
       next_edges.push_back(impl::gradient_edge(variable));
-    } else {
+    } 
+    else 
+    {
       next_edges.emplace_back();
     }
   }
@@ -395,23 +434,28 @@ struct MakeNextFunctionList : IterArgs<MakeNextFunctionList> {
 /// `set_gradient_edge` directly.
 inline void create_gradient_edge(
     Variable& variable,
-    std::shared_ptr<Node> function) {
+    std::shared_ptr<Node> function) 
+{
   // Copy before move.
   const auto input_nr = function->add_input_metadata(variable);
   impl::set_gradient_edge(variable, {std::move(function), input_nr});
 }
 
 /// Return true if any of the variables in the list require a gradient.
-inline bool any_variable_requires_grad(const variable_list& variables) {
+inline bool any_variable_requires_grad(const variable_list& variables) 
+{
   return std::any_of(
-      variables.begin(), variables.end(), [](const Variable& variable) {
+      variables.begin(), variables.end(), 
+      [](const Variable& variable) 
+      {
         return variable.defined() && variable.requires_grad();
       });
 }
 
 /// Return the next edges of all the given variables, or tuples of variables.
 template <typename... Variables>
-edge_list collect_next_edges(Variables&&... variables) {
+edge_list collect_next_edges(Variables&&... variables) 
+{
   if (!GradMode::is_enabled())
     return {};
   detail::MakeNextFunctionList make;

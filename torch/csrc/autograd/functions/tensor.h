@@ -13,7 +13,8 @@
 
 namespace torch { namespace autograd {
 
-struct TORCH_API CopyBackwards : public Node {
+struct TORCH_API CopyBackwards : public Node 
+{
   variable_list apply(variable_list&& grads) override;
 
   at::TensorOptions src_options;
@@ -27,7 +28,8 @@ struct TORCH_API CopyBackwards : public Node {
 // grad_fn is updated to become a `CopySlice` wrapping the backward of the
 // in-place operation.
 // See NOTE [ Autograd View Variables ].
-struct TORCH_API CopySlices : public Node {
+struct TORCH_API CopySlices : public Node 
+{
   CopySlices(
       const Variable& base_var,
       at::TensorGeometry view_,

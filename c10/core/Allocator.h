@@ -145,7 +145,8 @@ inline bool operator!=(std::nullptr_t, const DataPtr& dp) noexcept {
 // possible, or the raw interface will incorrectly reported as unsupported,
 // when it is actually possible.
 
-struct C10_API Allocator {
+struct C10_API Allocator 
+{
   virtual ~Allocator() = default;
 
   virtual DataPtr allocate(size_t n) const = 0;
@@ -154,15 +155,18 @@ struct C10_API Allocator {
   // is guaranteed to return a unique_ptr with this deleter attached;
   // it means the rawAllocate and rawDeallocate APIs are safe to use.
   // This function MUST always return the same BoundDeleter.
-  virtual DeleterFnPtr raw_deleter() const {
+  virtual DeleterFnPtr raw_deleter() const 
+  {
     return nullptr;
   }
-  void* raw_allocate(size_t n) {
+  void* raw_allocate(size_t n) 
+  {
     auto dptr = allocate(n);
     AT_ASSERT(dptr.get() == dptr.get_context());
     return dptr.release_context();
   }
-  void raw_deallocate(void* ptr) {
+  void raw_deallocate(void* ptr) 
+  {
     auto d = raw_deleter();
     AT_ASSERT(d);
     d(ptr);
@@ -179,7 +183,8 @@ struct C10_API Allocator {
 // This context is inefficient because we have to do a dynamic
 // allocation InefficientStdFunctionContext, on top of the dynamic
 // allocation which is implied by std::function itself.
-struct C10_API InefficientStdFunctionContext {
+struct C10_API InefficientStdFunctionContext 
+{
   std::unique_ptr<void, std::function<void(void*)>> ptr_;
   InefficientStdFunctionContext(
       std::unique_ptr<void, std::function<void(void*)>>&& ptr)
@@ -203,8 +208,10 @@ C10_API void SetAllocator(DeviceType t, Allocator* alloc);
 C10_API Allocator* GetAllocator(const DeviceType& t);
 
 template <DeviceType t>
-struct AllocatorRegisterer {
-  explicit AllocatorRegisterer(Allocator* alloc) {
+struct AllocatorRegisterer 
+{
+  explicit AllocatorRegisterer(Allocator* alloc) 
+  {
     SetAllocator(t, alloc);
   }
 };

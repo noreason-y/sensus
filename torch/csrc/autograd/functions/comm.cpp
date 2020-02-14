@@ -26,16 +26,19 @@ Scatter::Scatter(
       chunk_sizes_(chunk_sizes),
       dim_(dim),
       streams_(streams),
-      unsqueeze_scalars_(unsqueeze_scalars) {}
+      unsqueeze_scalars_(unsqueeze_scalars) 
+{}
 
 Scatter::~Scatter() {}
 
-variable_list Scatter::apply(variable_list&& inputs) {
+variable_list Scatter::apply(variable_list&& inputs) 
+{
   AT_ASSERT(inputs.size() == 1);
   auto& input = inputs.front();
 
   std::shared_ptr<Node> grad_fn;
-  if (compute_requires_grad(input)) {
+  if (compute_requires_grad(input)) 
+  {
     grad_fn =
         std::make_shared<Gather>(/*destination_device=*/input.device(), dim_);
     grad_fn->set_next_edges(collect_next_edges(input));

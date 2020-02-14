@@ -15,11 +15,13 @@ struct C10_API Storage {
       size_t size,
       Allocator* allocator,
       bool resizable)
-      : storage_impl_(c10::make_intrusive<StorageImpl>(
-            data_type,
-            size,
-            allocator,
-            resizable)) {}
+      : storage_impl_(
+          c10::make_intrusive<StorageImpl>(
+              data_type,
+              size,
+              allocator,
+              resizable)) 
+  {}
 
   // Creates storage with pre-allocated memory buffer. Allocator is given for
   // potential future reallocations, however it can be nullptr if the storage
@@ -40,7 +42,8 @@ struct C10_API Storage {
   // Legacy constructor for partially initialized (dtype or memory) storages
   // that can be temporarily created with Caffe2 APIs. See the note on top of
   // TensorImpl.h for details.
-  static Storage create_legacy(at::Device device, caffe2::TypeMeta data_type) {
+  static Storage create_legacy(at::Device device, caffe2::TypeMeta data_type) 
+  {
     auto allocator = GetAllocator(device.type());
     return Storage(c10::make_intrusive<StorageImpl>(
             data_type,
@@ -51,7 +54,8 @@ struct C10_API Storage {
   }
 
   template <typename T>
-  inline bool IsType() const {
+  inline bool IsType() const 
+  {
     return storage_impl_->IsType<T>();
   }
 
@@ -61,82 +65,101 @@ struct C10_API Storage {
   template <typename T>
   T* unsafe_data() const { return storage_impl_->unsafe_data<T>(); }
 
-  size_t elementSize() const {
+  size_t elementSize() const 
+  {
     return storage_impl_->itemsize();
   }
 
-  inline size_t itemsize() const {
+  inline size_t itemsize() const 
+  {
     return storage_impl_->itemsize();
   }
 
-  ptrdiff_t size() const {
+  ptrdiff_t size() const 
+  {
     return storage_impl_->numel();
   }
 
-  int64_t numel() const {
+  int64_t numel() const 
+  {
     return storage_impl_->numel();
   }
 
   // TODO: remove later
-  void set_numel(int64_t numel) const {
+  void set_numel(int64_t numel) const 
+  {
     storage_impl_.get()->set_numel(numel);
   }
 
-  bool resizable() const {
+  bool resizable() const 
+  {
     return storage_impl_->resizable();
   }
 
-  size_t capacity() const {
+  size_t capacity() const 
+  {
     return storage_impl_->capacity();
   }
   // get() use here is to get const-correctness
 
-  void* data() const {
+  void* data() const 
+  {
     return storage_impl_.get()->data();
   }
 
-  const caffe2::TypeMeta& dtype() const {
+  const caffe2::TypeMeta& dtype() const 
+  {
     return storage_impl_->dtype();
   }
 
-  at::DataPtr& data_ptr() {
+  at::DataPtr& data_ptr() 
+  {
     return storage_impl_->data_ptr();
   }
 
-  const at::DataPtr& data_ptr() const {
+  const at::DataPtr& data_ptr() const 
+  {
     return storage_impl_->data_ptr();
   }
 
   // Returns the previous data_ptr
-  at::DataPtr set_data_ptr(at::DataPtr&& data_ptr) const {
+  at::DataPtr set_data_ptr(at::DataPtr&& data_ptr) const 
+  {
     return storage_impl_.get()->set_data_ptr(std::move(data_ptr));
   };
 
-  void set_dtype(const caffe2::TypeMeta& data_type) const {
+  void set_dtype(const caffe2::TypeMeta& data_type) const 
+  {
     storage_impl_.get()->set_dtype(data_type);
   }
 
-  DeviceType device_type() const {
+  DeviceType device_type() const 
+  {
     return storage_impl_->device_type();
   }
 
-  at::Allocator* allocator() const {
+  at::Allocator* allocator() const 
+  {
     return storage_impl_.get()->allocator();
   }
 
-  at::Device device() const {
+  at::Device device() const 
+  {
     return storage_impl_->device();
   }
 
-  StorageImpl* unsafeReleaseStorageImpl() {
+  StorageImpl* unsafeReleaseStorageImpl() 
+  {
     return storage_impl_.release();
   }
 
-  StorageImpl* unsafeGetStorageImpl() const noexcept {
+  StorageImpl* unsafeGetStorageImpl() const noexcept 
+  {
     return storage_impl_.get();
   }
 
-  operator bool() const {
+  operator bool() const 
+  {
     return storage_impl_;
   }
 
