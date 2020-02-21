@@ -19,20 +19,25 @@ namespace torch { namespace autograd {
 /// numbers.
 thread_local uint64_t Function_next_sequence_nr_ = 0;
 
-uint64_t Node::peek_at_next_sequence_nr() {
+uint64_t Node::peek_at_next_sequence_nr() 
+{
   return Function_next_sequence_nr_;
 }
 
-uint64_t& Node::get_next_sequence_nr() {
+uint64_t& Node::get_next_sequence_nr() 
+{
   return Function_next_sequence_nr_;
 }
 
-auto Node::name() const -> std::string {
+auto Node::name() const -> std::string 
+{
   return c10::demangle(typeid(*this).name());
 }
 
-AnomalyMetadata* Node::metadata() noexcept {
-  if (!anomaly_metadata_) {
+AnomalyMetadata* Node::metadata() noexcept 
+{
+  if (!anomaly_metadata_) 
+  {
     anomaly_metadata_ = Engine::get_default_engine().make_anomaly_metadata();
   }
   return anomaly_metadata_.get();
@@ -40,13 +45,18 @@ AnomalyMetadata* Node::metadata() noexcept {
 
 static void gatherFunctions(
     Node* func,
-    std::vector<std::shared_ptr<Node>>& stack) {
+    std::vector<std::shared_ptr<Node>>& stack) 
+{
   func->release_variables();
 
-  for (auto& edge : func->next_edges()) {
-    if (edge.function.use_count() == 1) {
+  for (auto& edge : func->next_edges()) 
+  {
+    if (edge.function.use_count() == 1) 
+    {
       stack.emplace_back(std::move(edge.function));
-    } else {
+    } 
+    else 
+    {
       edge.function.reset();
     }
   }
@@ -72,7 +82,8 @@ static void gatherFunctions(
   * converting recursion to a loop, using a heap buffer in place of the
   * recursive call stack.
   */
-void deleteNode(Node* function) {
+void deleteNode(Node* function) 
+{
   // To avoid stack overflow on large computational graphs,
   // we need to track reference decrementing and freeing
   // on the heap.
@@ -81,7 +92,8 @@ void deleteNode(Node* function) {
   gatherFunctions(function, stack);
   delete function;
 
-  while (!stack.empty()) {
+  while (!stack.empty()) 
+  {
     auto func = std::move(stack.back());
     stack.pop_back();
     gatherFunctions(func.get(), stack);

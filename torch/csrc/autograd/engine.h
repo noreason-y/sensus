@@ -59,7 +59,7 @@ struct GraphTask
     struct Capture 
     {
       Capture(int input_idx, int output_idx)
-          : input_idx_(input_idx), output_idx_(output_idx) {}
+        : input_idx_(input_idx), output_idx_(output_idx) {}
       int input_idx_; // within Node inputs
       int output_idx_; // within the output vector of a GraphTask
     };
@@ -115,15 +115,16 @@ struct GraphTask
       bool grad_mode,
       int reentrant_depth,
       bool exit_on_error = false)
-      : has_error_(false),
-        outstanding_tasks_(0),
-        keep_graph_(keep_graph),
-        grad_mode_(grad_mode),
-        owner_(NO_DEVICE),
-        reentrant_depth_(reentrant_depth),
-        exit_on_error_(exit_on_error),
-        future_result_(std::make_shared<FutureVariableList>()) {}
-};
+        : has_error_(false),
+          outstanding_tasks_(0),
+          keep_graph_(keep_graph),
+          grad_mode_(grad_mode),
+          owner_(NO_DEVICE),
+          reentrant_depth_(reentrant_depth),
+          exit_on_error_(exit_on_error),
+          future_result_(std::make_shared<FutureVariableList>()) 
+  {}
+}; // struct GraphTask
 
 struct NodeTask 
 {
@@ -194,10 +195,7 @@ struct TORCH_API Engine
   // network for execution.
   void enqueue_blocked_task_on_cpu(NodeTask task);
 
-  virtual std::unique_ptr<AnomalyMetadata> make_anomaly_metadata() 
-  {
-    return nullptr;
-  }
+  virtual std::unique_ptr<AnomalyMetadata> make_anomaly_metadata() { return nullptr; }
 
   void queue_callback(std::function<void()> callback);
 

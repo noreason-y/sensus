@@ -11,23 +11,27 @@ namespace torch { namespace autograd {
 struct Node;
 
 /// Represents a particular input of a function.
-struct Edge {
+struct Edge 
+{
   Edge() noexcept : function(nullptr), input_nr(0) {}
 
   Edge(std::shared_ptr<Node> function_, uint32_t input_nr_) noexcept
       : function(std::move(function_)), input_nr(input_nr_) {}
 
   /// Convenience method to test if an edge is valid.
-  bool is_valid() const noexcept {
+  bool is_valid() const noexcept 
+  {
     return function != nullptr;
   }
 
   // Required for use in associative containers.
-  bool operator==(const Edge& other) const noexcept {
+  bool operator==(const Edge& other) const noexcept 
+  {
     return this->function == other.function && this->input_nr == other.input_nr;
   }
 
-  bool operator!=(const Edge& other) const noexcept {
+  bool operator!=(const Edge& other) const noexcept 
+  {
     return !(*this == other);
   }
 
@@ -50,7 +54,8 @@ struct hash<torch::autograd::Edge>
   // These type aliases are required by the standard.
   using argument_type = torch::autograd::Edge;
   using return_type = size_t;
-  return_type operator()(const argument_type& edge) const noexcept {
+  return_type operator()(const argument_type& edge) const noexcept 
+  {
     return torch::get_hash(edge.function, edge.input_nr);
   }
 };

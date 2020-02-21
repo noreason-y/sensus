@@ -6,6 +6,7 @@
 
 namespace torch {
 namespace autograd {
+
 // Computes the gradient of current tensor w.r.t. graph leaves.
 TORCH_API void backward(
     const variable_list& tensors,

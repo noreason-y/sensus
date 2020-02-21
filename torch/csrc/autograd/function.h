@@ -84,7 +84,8 @@ TORCH_API void deleteNode(Node* function);
 /// are created in one thread and `C` is created in a new thread, there are *no
 /// guarantees* w.r.t. the ordering of `C` relative to `A` or `B`.
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-struct TORCH_API Node : std::enable_shared_from_this<Node> {
+struct TORCH_API Node : std::enable_shared_from_this<Node> 
+{
  public:
   /// Construct a new `Node` with the given `next_edges`. `sequence_nr` is
   /// a (currently THE) hint to prioritization in the backward() pass, with
@@ -92,15 +93,17 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   explicit Node(
       uint64_t sequence_nr,
       edge_list&& next_edges = edge_list())
-      : sequence_nr_(sequence_nr),
-      next_edges_(std::move(next_edges)) {
-    if (AnomalyMode::is_enabled()) {
+        : sequence_nr_(sequence_nr),
+          next_edges_(std::move(next_edges)) 
+  {
+    if (AnomalyMode::is_enabled()) 
+    {
       metadata()->store_stack();
     }
   }
 
   explicit Node(edge_list&& next_edges = edge_list())
-      : Node(get_next_sequence_nr()++, std::move(next_edges)) {}
+    : Node(get_next_sequence_nr()++, std::move(next_edges)) {}
 
   /// Nodes are neither copyable nor moveable.
   Node(const Node& other) = delete;
@@ -135,9 +138,9 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   /// Adds the type and shape metadata for a new input. Returns the index of
   /// of the new input.
   uint32_t add_input_metadata(
-    const at::TensorOptions& options
-  , at::IntArrayRef shape
-  , at::Device device) noexcept 
+    const at::TensorOptions& options, 
+    at::IntArrayRef shape, 
+    at::Device device) noexcept 
   {
     uint32_t input_nr = input_metadata_.size();
     input_metadata_.emplace_back(options, shape, device);
@@ -194,7 +197,6 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
   }
 
   // Outputs ("Next Edges")
-
   const Edge& next_edge(size_t index) const noexcept 
   {
     return next_edges_[index];
@@ -215,7 +217,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node> {
     next_edges_ = std::move(next_edges);
   }
 
-  const edge_list& next_edges() const noexcept {
+  const edge_list& next_edges() const noexcept 
+  {
     return next_edges_;
   }
 

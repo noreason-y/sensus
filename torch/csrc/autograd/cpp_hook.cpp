@@ -4,8 +4,10 @@
 
 namespace {
 using torch::autograd::Variable;
-void check_single_result (Variable value, Variable result, std::string hook_name) {
-  if (!value.defined()) {
+void check_single_result (Variable value, Variable result, std::string hook_name) 
+{
+  if (!value.defined()) 
+  {
     throw std::runtime_error("can't replace a empty gradient with a non-empty value");
   }
   torch::autograd::check_variable_result(value, result, hook_name);
@@ -15,20 +17,23 @@ void check_single_result (Variable value, Variable result, std::string hook_name
 namespace torch { namespace autograd {
 
 CppFunctionPreHook::CppFunctionPreHook(const std::shared_ptr<hooks_list> &hooks, int value_idx)
-: hooks_(hooks)
-, value_idx_(value_idx)
+  : hooks_(hooks), 
+    value_idx_(value_idx)
 {}
 
 variable_list CppFunctionPreHook::operator()(const variable_list& values) {
   auto value = values[value_idx_];
-  for (unsigned i = 0; i < hooks_->size(); ++i) {
+  for (unsigned i = 0; i < hooks_->size(); ++i) 
+  {
     auto &hook = (*hooks_)[i];
-    if (!hook) {
+    if (!hook) 
+    {
       // hook was removed
       continue;
     }
     auto res = hook(value);
-    if (!res.defined()) {
+    if (!res.defined()) 
+    {
       // Don't change gradient
       continue;
     }

@@ -7,8 +7,9 @@ namespace torch { namespace autograd {
 
 using hooks_list = std::vector<std::function<Variable(const Variable&)>>;
 
-struct CppFunctionPreHook : public FunctionPreHook {
-  CppFunctionPreHook(const std::shared_ptr<hooks_list> &hooks, int value_idx);
+struct CppFunctionPreHook : public FunctionPreHook 
+{
+  CppFunctionPreHook(const std::shared_ptr<hooks_list>& hooks, int value_idx);
   variable_list operator()(const variable_list& values) override;
 
   std::shared_ptr<hooks_list> hooks_;
