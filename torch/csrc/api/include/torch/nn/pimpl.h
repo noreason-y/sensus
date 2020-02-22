@@ -23,7 +23,8 @@ namespace nn {
 /// `M` is an `nn::Module` subclass, with convenient constructors defined for
 /// the kind of constructions we want to allow for our modules.
 template <typename Contained>
-class ModuleHolder : torch::detail::ModuleHolderIndicator {
+class ModuleHolder : torch::detail::ModuleHolderIndicator 
+{
  protected:
   /// The module pointer this class wraps.
   /// NOTE: Must be placed at the top of the class so that we can use it with
@@ -39,7 +40,8 @@ class ModuleHolder : torch::detail::ModuleHolderIndicator {
   /// NOTE: This uses the behavior of template
   /// classes in C++ that constructors (or any methods) are only compiled when
   /// actually used.
-  ModuleHolder() : impl_(default_construct()) {
+  ModuleHolder() : impl_(default_construct()) 
+  {
     static_assert(
         std::is_default_constructible<Contained>::value,
         "You are trying to default construct a module which has "
@@ -54,16 +56,16 @@ class ModuleHolder : torch::detail::ModuleHolderIndicator {
 
   /// Constructs the `ModuleHolder` with a contained module, forwarding all
   /// arguments to its constructor.
-  template <
-      typename Head,
-      typename... Tail,
-      typename = typename std::enable_if<
-          !(torch::detail::is_module_holder_of<Head, ContainedType>::value &&
-            (sizeof...(Tail) == 0))>::type>
-  explicit ModuleHolder(Head&& head, Tail&&... tail)
-      : impl_(new Contained(
-            std::forward<Head>(head),
-            std::forward<Tail>(tail)...)) {}
+  template < 
+    typename Head, 
+    typename... Tail, 
+    typename = typename std::enable_if< 
+        !(torch::detail::is_module_holder_of<
+            Head, ContainedType>::value && (sizeof...(Tail) == 0))>::type>
+  explicit ModuleHolder(Head&& head, Tail&&... tail) 
+    : impl_(new Contained( 
+        std::forward<Head>(head), 
+        std::forward<Tail>(tail)...)) {}
 
   /// Constructs the `ModuleHolder` from a pointer to the contained type.
   /// Example: `Linear(std::make_shared<LinearImpl>(...))`.
@@ -72,12 +74,14 @@ class ModuleHolder : torch::detail::ModuleHolderIndicator {
 
   /// Returns true if the `ModuleHolder` contains a module, or false if it is
   /// `nullptr`.
-  explicit operator bool() const noexcept {
+  explicit operator bool() const noexcept 
+  {
     return !is_empty();
   }
 
   /// Forwards to the contained module.
-  Contained* operator->() {
+  Contained* operator->() 
+  {
     return get();
   }
 
@@ -134,7 +138,8 @@ class ModuleHolder : torch::detail::ModuleHolderIndicator {
   }
 
   /// Returns true if the `ModuleHolder` does not contain a module.
-  bool is_empty() const noexcept {
+  bool is_empty() const noexcept 
+  {
     return impl_ == nullptr;
   }
 

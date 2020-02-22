@@ -18,14 +18,17 @@ namespace nn {
 namespace {
 /// Joins names hierarchically: "name_prefix.name" if `name_prefix` is
 /// non-empty, else just "name".
-std::string join_name(const std::string& name_prefix, const std::string& name) {
+std::string join_name(const std::string& name_prefix, const std::string& name) 
+{
   size_t total_size = name.size();
-  if (!name_prefix.empty()) {
+  if (!name_prefix.empty()) 
+  {
     total_size += name_prefix.size() + 1;
   }
   std::string full_name;
   full_name.reserve(total_size);
-  if (!name_prefix.empty()) {
+  if (!name_prefix.empty()) 
+  {
     full_name += name_prefix;
     full_name.push_back('.');
   }
@@ -35,7 +38,10 @@ std::string join_name(const std::string& name_prefix, const std::string& name) {
 } // namespace
 
 Module::Module()
-    : parameters_("Parameter"), buffers_("Buffer"), children_("Submodule") {}
+  : parameters_("Parameter"), 
+    buffers_("Buffer"), 
+    children_("Submodule") 
+{}
 
 Module::Module(std::string name) : Module() {
   name_ = std::move(name);

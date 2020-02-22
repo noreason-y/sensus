@@ -25,20 +25,28 @@ inline THHalf __device__ curand_uniform_type<THHalf>(curandStatePhilox4_32_10_t 
 }
 
 template <>
-inline float __device__ curand_uniform_type<float>(curandStatePhilox4_32_10_t *state) {
+inline float __device__ curand_uniform_type<float>(curandStatePhilox4_32_10_t *state) 
+{
   auto rand = curand_uniform4(state);
   return rand.x;
 }
 
 template <>
-inline double __device__ curand_uniform_type<double>(curandStatePhilox4_32_10_t *state) {
+inline double __device__ curand_uniform_type<double>(curandStatePhilox4_32_10_t *state) 
+{
   auto rand = curand_uniform2_double(state);
   return rand.x;
 }
 
 template <typename T>
-__global__ void rreluUpdateOutputTrain(int n, std::pair<uint64_t, uint64_t> seeds,
-  T *input, T* noise, T *output, double a, double b)
+__global__ void rreluUpdateOutputTrain(
+    int n, 
+    std::pair<uint64_t, uint64_t> seeds,
+    T* input, 
+    T* noise, 
+    T *output, 
+    double a, 
+    double b)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   curandStatePhilox4_32_10_t state;
@@ -69,7 +77,8 @@ struct RReLUUpdateOutputEval_functor
     : negSlope_(negSlope)
   {}
 
-  __device__ __forceinline__ void operator()(T *out, T *in)
+  __device__ __forceinline__ 
+  void operator()(T* out, T* in)
   {
     const T x = *in;
     const T r = x <= 0 ? negSlope_ : ScalarConvert<int, T>::to(1);
@@ -86,7 +95,8 @@ struct RReLUUpdateOutputEvalIP_functor
     : negSlope_(negSlope)
   {}
 
-  __device__ __forceinline__ void operator()(T *x)
+  __device__ __forceinline__ 
+  void operator()(T *x)
   {
     if (*x <= 0)
     {
@@ -104,7 +114,8 @@ struct RReLUupdateGradInputEval_functor
     : negSlope_(negSlope)
   {}
 
-  __device__ __forceinline__ void operator()(T *gradIn, T *gradOut, T *in)
+  __device__ __forceinline__ 
+  void operator()(T *gradIn, T *gradOut, T *in)
   {
     *gradIn = (*in) <= 0 ? (*gradOut) * negSlope_ : (*gradOut);
   }
@@ -119,7 +130,8 @@ struct RReLUupdateGradInputEvalIP_functor
     : negSlope_(negSlope)
   {}
 
-  __device__ __forceinline__ void operator()(T *gradOut, T *in)
+  __device__ __forceinline__ 
+  void operator()(T *gradOut, T *in)
   {
     if (*in <= 0)
     {

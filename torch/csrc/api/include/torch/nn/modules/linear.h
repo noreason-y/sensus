@@ -33,7 +33,8 @@ TORCH_MODULE(Identity);
 // ============================================================================
 
 /// Applies a linear transformation with optional bias.
-class TORCH_API LinearImpl : public Cloneable<LinearImpl> {
+class TORCH_API LinearImpl : public Cloneable<LinearImpl> 
+{
  public:
   LinearImpl(int64_t in_features, int64_t out_features)
     : LinearImpl(LinearOptions(in_features, out_features)) {}
@@ -70,7 +71,8 @@ TORCH_MODULE(Linear);
 // ============================================================================
 
 /// A placeholder for Flatten operator
-class TORCH_API FlattenImpl : public Cloneable<FlattenImpl> {
+class TORCH_API FlattenImpl : public Cloneable<FlattenImpl> 
+{
  public:
   explicit FlattenImpl(const FlattenOptions& options_ = {});
 
@@ -95,9 +97,13 @@ TORCH_MODULE(Flatten);
 // ============================================================================
 
 /// Applies a billinear transformation with optional bias.
-class TORCH_API BilinearImpl : public Cloneable<BilinearImpl> {
+class TORCH_API BilinearImpl : public Cloneable<BilinearImpl> 
+{
  public:
-  BilinearImpl(int64_t in1_features, int64_t in2_features, int64_t out_features) : BilinearImpl(BilinearOptions(in1_features, in2_features, out_features)) {}
+  BilinearImpl(int64_t in1_features, int64_t in2_features, int64_t out_features) 
+    : BilinearImpl(BilinearOptions(in1_features, in2_features, out_features)) 
+  {}
+
   explicit BilinearImpl(const BilinearOptions& options_);
 
   void reset() override;

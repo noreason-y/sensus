@@ -176,7 +176,8 @@ namespace impl {
 /// As an optimization, a Variable may store a nullptr, in lieu of a default
 /// constructed AutogradMeta.
 
-struct TORCH_API AutogradMeta : public c10::AutogradMetaInterface {
+struct TORCH_API AutogradMeta : public c10::AutogradMetaInterface 
+{
   std::string name_;
 
   Variable grad_;
@@ -205,34 +206,40 @@ struct TORCH_API AutogradMeta : public c10::AutogradMetaInterface {
   /// Sets the `requires_grad` property of `Variable`. This should be true for
   /// leaf variables that want to accumulate gradients, and false for all other
   /// variables.
-  void set_requires_grad(bool requires_grad, at::TensorImpl* self_impl) override {
+  void set_requires_grad(bool requires_grad, at::TensorImpl* self_impl) override 
+  {
     TORCH_CHECK(
       !requires_grad || at::isFloatingType(at::typeMetaToScalarType(self_impl->dtype())),
       "Only Tensors of floating point dtype can require gradients");
     requires_grad_ = requires_grad;
   }
 
-  bool requires_grad() const override {
+  bool requires_grad() const override 
+  {
     return requires_grad_ || grad_fn_;
   }
 
   /// Accesses the gradient `Variable` of this `Variable`.
-  Variable& grad() override {
+  Variable& grad() override 
+  {
     return grad_;
   }
 
-  const Variable& grad() const override {
+  const Variable& grad() const override 
+  {
     return grad_;
   }
 
-  AutogradMeta(at::TensorImpl* self_impl = nullptr, bool requires_grad = false, Edge gradient_edge = Edge() ) {
+  AutogradMeta(at::TensorImpl* self_impl=nullptr, bool requires_grad=false, Edge gradient_edge=Edge()) 
+  {
     grad_fn_ = std::move(gradient_edge.function);
     requires_grad_ = false;
     is_view_ = false;
     output_nr_ = gradient_edge.input_nr;
 
     // set_requires_grad also checks error conditions.
-    if (requires_grad) {
+    if (requires_grad) 
+    {
       TORCH_INTERNAL_ASSERT(self_impl);
       set_requires_grad(requires_grad, self_impl);
     }
@@ -324,7 +331,8 @@ struct TORCH_API AutogradMeta : public c10::AutogradMetaInterface {
 ///
 /// Relevant logic for both differentiable and non-differentiable views is implemented in
 /// make_variable_(non_)differentiable_view below, and wrap_output of gen_variable_type.py.
-struct TORCH_API DifferentiableViewMeta : public AutogradMeta {
+struct TORCH_API DifferentiableViewMeta : public AutogradMeta 
+{
   /// The base `Variable` (never a view).
   Variable base_;
 
@@ -337,7 +345,8 @@ struct TORCH_API DifferentiableViewMeta : public AutogradMeta {
   /// or if it is forbidden.
   bool allow_rebase_history;
 
-  bool requires_grad() const override {
+  bool requires_grad() const override 
+  {
     return requires_grad_ || grad_fn_ || (is_view_ && base_.requires_grad());
   }
 
@@ -370,15 +379,20 @@ struct TORCH_API DifferentiableViewMeta : public AutogradMeta {
 inline Variable make_variable_differentiable_view(
     Variable base,
     at::Tensor data,
-    bool allow_rebase_history) {
-  if (data.defined()) {
+    bool allow_rebase_history) 
+{
+  if (data.defined()) 
+  {
     auto data_impl_copy = data.getIntrusivePtr()->shallow_copy_and_detach(
       /*version_counter=*/0,
       /*allow_tensor_metadata_change=*/true);
     data_impl_copy->set_autograd_meta(std::make_unique<DifferentiableViewMeta>(
-      data_impl_copy.get(), std::move(base), allow_rebase_history));
+        data_impl_copy.get(), 
+        std::move(base), 
+        allow_rebase_history));
+
     return Variable(data_impl_copy);
-    }
+  }
   return Variable();
 }
 
@@ -387,11 +401,13 @@ inline Variable make_variable_differentiable_view(
 inline Variable make_variable_non_differentiable_view(
     Variable base,
     at::Tensor data,
-    bool allow_tensor_metadata_change = true) {
-  if (data.defined()) {
+    bool allow_tensor_metadata_change = true) 
+{
+  if (data.defined()) 
+  {
     auto data_impl_copy = data.getIntrusivePtr()->shallow_copy_and_detach(
-      /*version_counter=*/impl::version_counter(base),
-      /*allow_tensor_metadata_change=*/allow_tensor_metadata_change);
+        /*version_counter=*/impl::version_counter(base),
+        /*allow_tensor_metadata_change=*/allow_tensor_metadata_change);
     data_impl_copy->set_autograd_meta(nullptr);
     return Variable(data_impl_copy);
   }
@@ -410,25 +426,37 @@ inline Variable make_variable_non_differentiable_view(
 inline Variable make_variable(
     at::Tensor data,
     bool requires_grad = false,
-    bool allow_tensor_metadata_change = true) {
-  if (data.defined()) {
-    if (data.getIntrusivePtr().use_count() == 1 && data.getIntrusivePtr()->unique_version()) {
+    bool allow_tensor_metadata_change = true) 
+{
+  if (data.defined()) 
+  {
+    if (data.getIntrusivePtr().use_count() == 1 && data.getIntrusivePtr()->unique_version()) 
+    {
       auto data_impl = data.getIntrusivePtr();
       data_impl->set_allow_tensor_metadata_change(allow_tensor_metadata_change);
-      if (requires_grad) {
-        data_impl->set_autograd_meta(std::make_unique<AutogradMeta>(data_impl.get(), requires_grad));
-      } else {
+      if (requires_grad) 
+      {
+        data_impl->set_autograd_meta(
+            std::make_unique<AutogradMeta>(data_impl.get(), requires_grad));
+      } 
+      else 
+      {
         data_impl->set_autograd_meta(nullptr);
       }
       return Variable(std::move(data_impl));
-    } else {
+    } 
+    else 
+    {
       auto data_impl_copy = data.getIntrusivePtr()->shallow_copy_and_detach(
-        /*version_counter=*/0,
-        /*allow_tensor_metadata_change=*/allow_tensor_metadata_change);
-      if (requires_grad) {
+          /*version_counter=*/0,
+          /*allow_tensor_metadata_change=*/allow_tensor_metadata_change);
+      if (requires_grad) 
+      {
         data_impl_copy->set_autograd_meta(std::make_unique<AutogradMeta>(
-          data_impl_copy.get(), requires_grad));
-      } else {
+            data_impl_copy.get(), requires_grad));
+      } 
+      else 
+      {
         data_impl_copy->set_autograd_meta(nullptr);
       }
       return Variable(data_impl_copy);
@@ -444,13 +472,15 @@ inline Variable make_variable(
 inline Variable make_variable(
     at::Tensor data,
     Edge gradient_edge,
-    bool allow_tensor_metadata_change = true) {
-  if (data.defined()) {
+    bool allow_tensor_metadata_change = true) 
+{
+  if (data.defined()) 
+  {
     auto data_impl_copy = data.getIntrusivePtr()->shallow_copy_and_detach(
       /*version_counter=*/0,
       /*allow_tensor_metadata_change=*/allow_tensor_metadata_change);
     data_impl_copy->set_autograd_meta(std::make_unique<AutogradMeta>(
-      data_impl_copy.get(), false, std::move(gradient_edge)));
+        data_impl_copy.get(), false, std::move(gradient_edge)));
     return Variable(data_impl_copy);
   }
   return Variable();
@@ -461,11 +491,13 @@ inline Variable make_variable(
 
 // In the old days, these casts were checked, but now that every Tensor
 // is a Variable this cast is always valid
-inline Variable& as_variable_ref(at::Tensor& tensor) {
+inline Variable& as_variable_ref(at::Tensor& tensor) 
+{
   return static_cast<Variable&>(tensor);
 }
 
-inline const Variable& as_variable_ref(const at::Tensor& tensor) {
+inline const Variable& as_variable_ref(const at::Tensor& tensor) 
+{
   return static_cast<const Variable&>(tensor);
 }
 

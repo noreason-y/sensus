@@ -17,38 +17,48 @@ namespace torch { namespace autograd {
  * If is_valid() is false, then the corresponding input is not used and may be
  * an undefined tensor.
  */
-struct InputMetadata {
+struct InputMetadata 
+{
   InputMetadata() = default;
 
   InputMetadata(const at::TensorOptions options, at::IntArrayRef shape, at::Device device)
-  : options_{options}, shape_{shape}, device_{device} {
+    : options_{options}, 
+      shape_{shape}, 
+      device_{device} 
+  {
     stream_ = c10::impl::getDeviceGuardImpl(device_.type())->getStream(device_);
   }
 
   InputMetadata(const at::Tensor& t)
-  : InputMetadata(t.options(), t.sizes(), t.device()) { }
+    : InputMetadata(t.options(), t.sizes(), t.device()) 
+  {}
 
-  const at::TensorOptions options() const {
+  const at::TensorOptions options() const 
+  {
     return options_;
   }
 
-  at::IntArrayRef shape() const {
+  at::IntArrayRef shape() const 
+  {
     return shape_;
   }
 
-  at::Device device() const {
+  at::Device device() const 
+  {
     return device_;
   }
 
-  c10::Stream stream() const {
+  c10::Stream stream() const 
+  {
     return stream_;
   }
 
-  at::Tensor zeros_like() const {
+  at::Tensor zeros_like() const 
+  {
     return at::zeros(shape_, options_);
   }
 
-private:
+ private:
   const at::TensorOptions options_;
   at::DimVector shape_;
   at::Device device_ = at::kCPU;

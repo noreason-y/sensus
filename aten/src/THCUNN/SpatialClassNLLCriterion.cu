@@ -13,13 +13,15 @@
 #include <thrust/functional.h>
 
 template <typename Dtype>
-__global__ void SpatialClassNLLCriterion_updateOutput_no_reduce_kernel(
+__global__ 
+void SpatialClassNLLCriterion_updateOutput_no_reduce_kernel(
     int64_t nthreads,
     THCDeviceTensor<Dtype, 4> input,
     THCDeviceTensor<THCIndex_t, 3> target,
     THCDeviceTensor<Dtype, 3> output,
     Dtype *weights,
-    int64_t ignore_index) {
+    int64_t ignore_index) 
+{
   int64_t batch_size = input.getSize(0);
   int64_t H = input.getSize(2);
   int64_t W = input.getSize(3);

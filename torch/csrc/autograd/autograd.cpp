@@ -72,11 +72,13 @@ variable_list run_backward(
     bool keep_graph,
     bool create_graph,
     const variable_list& inputs,
-    bool allow_unused) {
+    bool allow_unused) 
+{
   size_t num_tensors = outputs.size();
   edge_list roots;
   roots.reserve(num_tensors);
-  for (size_t i = 0; i < num_tensors; i++) {
+  for (size_t i = 0; i < num_tensors; i++) 
+  {
     const Variable& output = outputs[i];
     auto gradient_edge = impl::gradient_edge(output);
     TORCH_CHECK(
@@ -87,33 +89,46 @@ variable_list run_backward(
   }
 
   edge_list output_edges;
-  if (!inputs.empty()) {
+  if (!inputs.empty()) 
+  {
     size_t num_inputs = inputs.size();
     output_edges.reserve(num_inputs);
-    for (size_t i = 0; i < num_inputs; ++i) {
+    for (size_t i = 0; i < num_inputs; ++i) 
+    {
       const Variable& input = inputs[i];
       const auto output_nr = input.output_nr();
       auto grad_fn = input.grad_fn();
-      if (!grad_fn) {
+      if (!grad_fn) 
+      {
         grad_fn = impl::try_get_grad_accumulator(input);
       }
       TORCH_CHECK(
           input.requires_grad(),
           "One of the differentiated Tensors does not require grad");
-      if (!grad_fn) {
+      if (!grad_fn) 
+      {
         output_edges.emplace_back();
-      } else {
+      } 
+      else 
+      {
         output_edges.emplace_back(grad_fn, output_nr);
       }
     }
   }
 
   variable_list grad_inputs = Engine::get_default_engine().execute(
-      roots, grad_outputs, keep_graph, create_graph, output_edges);
+      roots, 
+      grad_outputs, 
+      keep_graph, 
+      create_graph, 
+      output_edges);
+
   // check if grad_inputs contains None or not base on the allow_unused flag
-  if (inputs.empty()) {
+  if (inputs.empty()) 
+  {
     size_t num_inputs = inputs.size();
-    for (size_t i = 0; i < num_inputs; ++i) {
+    for (size_t i = 0; i < num_inputs; ++i) 
+    {
       TORCH_CHECK(
           allow_unused || grad_inputs[i].defined(),
           "One of the "
@@ -129,9 +144,11 @@ void backward(
     const variable_list& tensors,
     const variable_list& grad_tensors,
     c10::optional<bool> retain_graph,
-    bool create_graph) {
+    bool create_graph) 
+{
   variable_list gradients = _make_grads(tensors, grad_tensors);
-  if (!retain_graph) {
+  if (!retain_graph) 
+  {
     retain_graph = create_graph;
   }
   run_backward(tensors, gradients, retain_graph.value(), create_graph, {}, /*allow_unused=*/true);
@@ -143,13 +160,20 @@ variable_list grad(
     const variable_list& grad_outputs,
     c10::optional<bool> retain_graph,
     bool create_graph,
-    bool allow_unused) {
+    bool allow_unused) 
+{
   variable_list gradients = _make_grads(outputs, grad_outputs);
-  if (!retain_graph) {
+  if (!retain_graph) 
+  {
     retain_graph = create_graph;
   }
   return run_backward(
-    outputs, gradients, retain_graph.value(), create_graph, inputs, allow_unused);
+    outputs, 
+    gradients, 
+    retain_graph.value(), 
+    create_graph, 
+    inputs, 
+    allow_unused);
 }
 
 } // namespace autograd

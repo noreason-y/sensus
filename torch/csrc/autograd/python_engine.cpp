@@ -93,14 +93,16 @@ PyObject *THPEngineClass = nullptr;
 
 static bool _reinitialize_engine = false;
 
-static void _maybe_reinitialize_engine_after_fork() {
+static void _maybe_reinitialize_engine_after_fork() 
+{
   // This is "probably" thread-safe because the flag is set in a fork handler
   // before any threads are created, and this function is only called with the
   // GIL held. However, using fork + threads is playing with fire so this is
   // more of a "best effort" thing. For example, if the fork occurs while the
   // backwards threads hold a lock, we'll probably deadlock in the engine
   // destructor.
-  if (_reinitialize_engine) {
+  if (_reinitialize_engine) 
+  {
     engine.~PythonEngine();
     new (&engine) torch::autograd::python::PythonEngine();
     _reinitialize_engine = false;
@@ -108,7 +110,7 @@ static void _maybe_reinitialize_engine_after_fork() {
 }
 
 // Implementation of torch._C._EngineBase.run_backward
-PyObject *THPEngine_run_backward(THPEngine *self, PyObject *args, PyObject *kwargs)
+PyObject* THPEngine_run_backward(THPEngine *self, PyObject *args, PyObject *kwargs)
 {
   HANDLE_TH_ERRORS
   _maybe_reinitialize_engine_after_fork();
@@ -119,8 +121,8 @@ PyObject *THPEngine_run_backward(THPEngine *self, PyObject *args, PyObject *kwar
   PyObject *inputs = nullptr;
   unsigned char allow_unreachable = 0;
   const char *accepted_kwargs[] = {
-      "tensors", "grad_tensors", "keep_graph", "create_graph", "inputs",
-      "allow_unreachable", nullptr
+    "tensors", "grad_tensors", "keep_graph", "create_graph", "inputs",
+    "allow_unreachable", nullptr
   };
   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OObb|Ob", (char**)accepted_kwargs,
         &tensors, &grad_tensors, &keep_graph, &create_graph, &inputs, &allow_unreachable))
