@@ -34,84 +34,85 @@ variable_list _wrap_outputs(
   int num_outputs = raw_outputs.size();
 
   // Sets the grad_fn and output_nr of an output Variable.
-  auto set_history = [&] (
-      Variable& var, 
-      uint32_t output_nr, 
-      bool is_input, 
-      bool is_modified, 
-      bool is_differentiable) 
-  { 
-    if (!is_differentiable) 
-    { 
-      if (!var.requires_grad()) { return; }
-      // NB: we don't support returning non-differentiable views that could require grad
-      if (var.is_view()) 
-      {
-        throw std::runtime_error(
-            "Returning Variables sharing storage with other Variables " 
-            "that require grad is not supported in Python functions. " 
-            "Please submit a feature request if you hit this error.");
-      }
-      // Return detached aliases of inputs, instead of changing their requires_grad
-      // property.
-      if (is_input) 
-      {
-        var = var.detach();
-      } 
-      else 
-      {
-        var.detach_();
-      }
-    } 
-    else if (is_modified) 
-    {
-      if (var.is_leaf() && var.requires_grad()) 
-      {
-        throw std::runtime_error("a leaf Variable that requires grad has been used in an in-place operation.");
-      }
-      // No need to mark as modified Tensors that are not inputs.
-      if (!is_input) 
-      {
-        TORCH_WARN("Only input Tensors should be given to ctx.mark_dirty(). If a Tensor is not an input, there"
-                   " is no need to pass it to mark_dirty().");
-      }
-      // If the input is a view, the rebase will need to rewrite the graph and this only works if we have a single
-      // output to this Function.
-      TORCH_CHECK(!(var.is_view() && num_outputs > 1), 
-          "If your Function modifies inplace an input that is a view" 
-          " of another Tensor, your Function cannot return more than one Tensor. This is not supported" 
-          " by the current autograd engine. You should either make sure the input is not a view (using" 
-          " .clone() for example) or make your Function only return one Tensor (potentially splitting" 
-          " it into two Functions: one doing the inplace that returns a single Tensor and a second one" 
-          " that does the other operations). You can ask on the forum https://discuss.pytorch.org/ if" 
-          " you need help to do this change.");
+  auto set_history = 
+      [&] (
+          Variable& var, 
+          uint32_t output_nr, 
+          bool is_input, 
+          bool is_modified, 
+          bool is_differentiable) 
+      { 
+        if (!is_differentiable) 
+        { 
+          if (!var.requires_grad()) { return; }
+          // NB: we don't support returning non-differentiable views that could require grad
+          if (var.is_view()) 
+          {
+            throw std::runtime_error(
+                "Returning Variables sharing storage with other Variables " 
+                "that require grad is not supported in Python functions. " 
+                "Please submit a feature request if you hit this error.");
+          }
+          // Return detached aliases of inputs, instead of changing their requires_grad
+          // property.
+          if (is_input) 
+          {
+            var = var.detach();
+          } 
+          else 
+          {
+            var.detach_();
+          }
+        } 
+        else if (is_modified) 
+        {
+          if (var.is_leaf() && var.requires_grad()) 
+          {
+            throw std::runtime_error("a leaf Variable that requires grad has been used in an in-place operation.");
+          }
+          // No need to mark as modified Tensors that are not inputs.
+          if (!is_input) 
+          {
+            TORCH_WARN("Only input Tensors should be given to ctx.mark_dirty(). If a Tensor is not an input, there"
+                      " is no need to pass it to mark_dirty().");
+          }
+          // If the input is a view, the rebase will need to rewrite the graph and this only works if we have a single
+          // output to this Function.
+          TORCH_CHECK(!(var.is_view() && num_outputs > 1), 
+              "If your Function modifies inplace an input that is a view" 
+              " of another Tensor, your Function cannot return more than one Tensor. This is not supported" 
+              " by the current autograd engine. You should either make sure the input is not a view (using" 
+              " .clone() for example) or make your Function only return one Tensor (potentially splitting" 
+              " it into two Functions: one doing the inplace that returns a single Tensor and a second one" 
+              " that does the other operations). You can ask on the forum https://discuss.pytorch.org/ if" 
+              " you need help to do this change.");
 
-      // If the input was modified, transplant the grad_fn in the graph:
-      // grad_fn <- variable <- self  ==>  grad_fn <- self <- variable
-      var.grad().reset();
-      impl::clear_hooks(var);
-      if (auto grad_acc_fn = impl::try_get_grad_accumulator(var)) 
-      {
-        auto grad_acc = dynamic_cast<AccumulateGrad*>(grad_acc_fn.get());
-        grad_acc->variable.reset();
-      }
-      if (cdata) 
-      {
-        impl::rebase_history(var, {cdata, output_nr});
-      }
-    } 
-    else if (is_input) 
-    {
-      // An input has been returned, but it wasn't modified. Return it as a view
-      // so that we can attach a new grad_fn to the Variable.
-      var = var.view_as(var);
-      impl::set_gradient_edge(var, {cdata, output_nr});
-    } 
-    else if (cdata) 
-    {
-      impl::set_gradient_edge(var, {cdata, output_nr});
-    }
-  };
+          // If the input was modified, transplant the grad_fn in the graph:
+          // grad_fn <- variable <- self  ==>  grad_fn <- self <- variable
+          var.grad().reset();
+          impl::clear_hooks(var);
+          if (auto grad_acc_fn = impl::try_get_grad_accumulator(var)) 
+          {
+            auto grad_acc = dynamic_cast<AccumulateGrad*>(grad_acc_fn.get());
+            grad_acc->variable.reset();
+          }
+          if (cdata) 
+          {
+            impl::rebase_history(var, {cdata, output_nr});
+          }
+        } 
+        else if (is_input) 
+        {
+          // An input has been returned, but it wasn't modified. Return it as a view
+          // so that we can attach a new grad_fn to the Variable.
+          var = var.view_as(var);
+          impl::set_gradient_edge(var, {cdata, output_nr});
+        } 
+        else if (cdata) 
+        {
+          impl::set_gradient_edge(var, {cdata, output_nr});
+        }
+      };
 
   std::vector<torch::autograd::Variable> outputs;
   std::unordered_set<at::TensorImpl*> outputs_impl; // For dirty_inputs check

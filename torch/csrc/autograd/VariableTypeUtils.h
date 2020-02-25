@@ -37,15 +37,20 @@
 using namespace at;
 using namespace torch::autograd::generated;
 
-namespace torch { namespace autograd {
+// namespace torch { namespace autograd {
+namespace torch::autograd {
 
 inline void check_inplace(const Tensor& tensor) {
   auto& var = static_cast<const Variable&>(tensor);
-  if (var.requires_grad() && GradMode::is_enabled()) {
-    if (var.is_leaf()) {
+  if (var.requires_grad() && GradMode::is_enabled()) 
+  {
+    if (var.is_leaf()) 
+    {
       AT_ERROR(
         "a leaf Variable that requires grad is being used in an in-place operation.");
-    } else if (var.is_view()) {
+    } 
+    else if (var.is_view()) 
+    {
       // NB: is_view() ==> get_autograd_meta()
       auto diff_view_meta = static_cast<DifferentiableViewMeta*>(impl::get_autograd_meta(var));
       auto grad_fn = impl::grad_fn_unsafe(var);
@@ -58,7 +63,8 @@ inline void check_inplace(const Tensor& tensor) {
   }
 }
 
-inline void throw_error_out_requires_grad(const char* name) {
+inline void throw_error_out_requires_grad(const char* name) 
+{
   AT_ERROR(
       name, "(): functions with out=... arguments don't support automatic differentiation, "
       "but one of the arguments requires grad.");
@@ -66,41 +72,53 @@ inline void throw_error_out_requires_grad(const char* name) {
 
 // TODO: Blegh, bare references
 
-inline void rebase_history(Variable& var, std::shared_ptr<Node> grad_fn) {
-  if (grad_fn && var.defined()) {
+inline void rebase_history(Variable& var, std::shared_ptr<Node> grad_fn) 
+{
+  if (grad_fn && var.defined()) 
+  {
     grad_fn->add_input_metadata(var);
     impl::rebase_history(var, {std::move(grad_fn), 0});
   }
 }
 
-inline void rebase_history(std::vector<Variable>&& vars, std::shared_ptr<Node> grad_fn) {
-  if (grad_fn) {
-    for (auto& var : vars) {
-      if (var.defined()) {
+inline void rebase_history(std::vector<Variable>&& vars, std::shared_ptr<Node> grad_fn) 
+{
+  if (grad_fn) 
+  {
+    for (auto& var : vars) 
+    {
+      if (var.defined()) 
+      {
         // TODO: eliminate const_cast
         auto output_nr = grad_fn->add_input_metadata(var);
         impl::rebase_history(var, {std::move(grad_fn), output_nr});
-      } else {
+      } 
+      else 
+      {
         grad_fn->add_input_metadata(Node::undefined_input());
       }
     }
   }
 }
 
-inline void increment_version(Tensor & t) {
+inline void increment_version(Tensor & t) 
+{
   impl::bump_version(as_variable_ref(t));
 }
 
-struct Flatten : IterArgs<Flatten> {
+struct Flatten : IterArgs<Flatten> 
+{
   Flatten(variable_list& out) : out(out) {}
   variable_list& out;
   void operator()(const at::Tensor& x) { out.emplace_back(x); }
-  void operator()(at::ArrayRef<at::Tensor> xs) {
+  void operator()(at::ArrayRef<at::Tensor> xs) 
+  {
     out.insert(out.end(), xs.begin(), xs.end());
   }
 };
 
-template<typename... Args> inline variable_list flatten_tensor_args(Args&&... args) {
+template<typename... Args> inline variable_list flatten_tensor_args(Args&&... args) 
+{
   variable_list out;
   out.reserve(count_tensors(std::forward<Args>(args)...));
   Flatten(out).apply(std::forward<Args>(args)...);
@@ -108,40 +126,64 @@ template<typename... Args> inline variable_list flatten_tensor_args(Args&&... ar
 }
 
 // See NOTE [ Autograd View Variables ] for details.
-inline Tensor as_view(const Tensor & base, Tensor tensor, bool is_differentiable, bool allow_rebase_history=true) {
+inline Tensor as_view(
+    const Tensor& base, 
+    Tensor tensor, 
+    bool is_differentiable, 
+    bool allow_rebase_history=true) 
+{
   auto base_var = Variable(base);
-  if (base_var.is_view()) {
+  if (base_var.is_view()) 
+  {
     base_var = base_var.base();
   }
-  if (is_differentiable) {
+  if (is_differentiable) 
+  {
     return make_variable_differentiable_view(std::move(base_var), std::move(tensor), allow_rebase_history);
-  } else {
-    TORCH_CHECK(allow_rebase_history, "Non-differentiable views cannot set allow_rebase_history=false");
+  } 
+  else 
+  {
+    TORCH_CHECK(
+        allow_rebase_history, 
+        "Non-differentiable views cannot set allow_rebase_history=false");
     return make_variable_non_differentiable_view(std::move(base_var), std::move(tensor));
   }
 }
 
 // See NOTE [ Autograd View Variables ] for details.
-inline std::vector<Tensor> as_view(const Tensor & base, std::vector<Tensor> tensors, bool is_differentiable,
-                                   bool allow_rebase_history=true) {
+inline std::vector<Tensor> as_view(
+    const Tensor & base, 
+    std::vector<Tensor> tensors, 
+    bool is_differentiable, 
+    bool allow_rebase_history=true) 
+{
   auto base_var = Variable(base);
-  if (base_var.is_view()) {
+  if (base_var.is_view()) 
+  {
     base_var = base_var.base();
   }
-  for(Tensor &tensor : tensors) {
-    if (is_differentiable) {
+  for(Tensor &tensor : tensors) 
+  {
+    if (is_differentiable) 
+    {
       tensor = make_variable_differentiable_view(base_var, std::move(tensor), allow_rebase_history);
-    } else {
-      TORCH_CHECK(allow_rebase_history, "Non-differentiable views cannot set allow_rebase_history=false");
+    } 
+    else 
+    {
+      TORCH_CHECK(
+          allow_rebase_history, 
+          "Non-differentiable views cannot set allow_rebase_history=false");
       tensor = make_variable_non_differentiable_view(base_var, std::move(tensor));
     }
   }
   return tensors;
 }
 
-inline void check_no_requires_grad(const Tensor& tensor, const char* name) {
+inline void check_no_requires_grad(const Tensor& tensor, const char* name) 
+{
   auto& var = static_cast<const Variable&>(tensor);
-  if (var.defined() && var.requires_grad()) {
+  if (var.defined() && var.requires_grad()) 
+  {
     std::string msg = "the derivative for '";
     msg += name;
     msg += "' is not implemented";
@@ -149,24 +191,34 @@ inline void check_no_requires_grad(const Tensor& tensor, const char* name) {
   }
 }
 
-inline void check_no_requires_grad(TensorList tensors, const char* name) {
-  for (auto& tensor : tensors) {
+inline void check_no_requires_grad(TensorList tensors, const char* name) 
+{
+  for (auto& tensor : tensors) 
+  {
     check_no_requires_grad(tensor, name);
   }
 }
 
 // Assumed that saved tensor lists are never inplace outputs
-inline std::vector<SavedVariable> make_saved_variable_list(TensorList tensors) {
-  return fmap(tensors, [](const Tensor& tensor) -> SavedVariable {
-      return SavedVariable{tensor, false /* is output */}; });
+inline std::vector<SavedVariable> make_saved_variable_list(TensorList tensors) 
+{
+  return fmap(
+      tensors, 
+      [](const Tensor& tensor) -> SavedVariable 
+      {
+        return SavedVariable{tensor, false /* is output */}; 
+      });
 }
 
-inline std::vector<std::vector<int64_t>> to_args_sizes(TensorList tensors) {
+inline std::vector<std::vector<int64_t>> to_args_sizes(TensorList tensors) 
+{
   std::vector<std::vector<int64_t>> args_sizes(tensors.size());
-  for (size_t i = 0; i < tensors.size(); ++i) {
+  for (size_t i = 0; i < tensors.size(); ++i) 
+  {
     args_sizes[i] = tensors[i].sizes().vec();
   }
   return args_sizes;
 }
 
-}} // namespace torch::autograd
+} // namespace torch::autograd
+// }} // namespace torch::autograd

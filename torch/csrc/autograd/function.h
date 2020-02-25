@@ -103,7 +103,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node>
   }
 
   explicit Node(edge_list&& next_edges = edge_list())
-    : Node(get_next_sequence_nr()++, std::move(next_edges)) {}
+    : Node(get_next_sequence_nr()++, std::move(next_edges)) 
+  {}
 
   /// Nodes are neither copyable nor moveable.
   Node(const Node& other) = delete;
@@ -117,7 +118,8 @@ struct TORCH_API Node : std::enable_shared_from_this<Node>
   variable_list operator()(variable_list&& inputs) 
   {
     RECORD_FUNCTION(
-        this, std::vector<c10::IValue>(inputs.begin(), inputs.end()));
+        this, 
+        std::vector<c10::IValue>(inputs.begin(), inputs.end()));
 
     // In the first iteration of named tensors, autograd ignores names and
     // operates on unnamed tensors. In the long term, autograd should
@@ -255,15 +257,18 @@ struct TORCH_API Node : std::enable_shared_from_this<Node>
   /// Returns true if any of the output edges in any of the ranges are active.
   bool should_compute_output(std::initializer_list<IndexRange> idxs) const 
   {
-    return std::any_of(idxs.begin(), idxs.end(), [this](IndexRange range) 
-    {
-      for (auto i = range.first; i < range.second; i++) 
-      {
-        if (should_compute_output(i))
-          return true;
-      }
-      return false;
-    });
+    return std::any_of(
+        idxs.begin(), 
+        idxs.end(), 
+        [this](IndexRange range) 
+        {
+          for (auto i = range.first; i < range.second; i++) 
+          {
+            if (should_compute_output(i))
+              return true;
+          }
+          return false;
+        });
   }
 
   /// Returns the `PyObject` stored for this `Node` (for Python

@@ -59,7 +59,9 @@ struct GraphTask
     struct Capture 
     {
       Capture(int input_idx, int output_idx)
-        : input_idx_(input_idx), output_idx_(output_idx) {}
+        : input_idx_(input_idx), output_idx_(output_idx) 
+      {}
+
       int input_idx_; // within Node inputs
       int output_idx_; // within the output vector of a GraphTask
     };
@@ -72,6 +74,7 @@ struct GraphTask
     bool needed_ = false;
     std::unique_ptr<std::vector<Capture>> captures_;
   };
+
   // Exec info has a bit complicated semantics. If it's empty, it means the task
   // is run in a "default" mode, which means that all next_edges we encounter
   // should get executed. If it's not empty, only functions that have an entry
@@ -130,10 +133,12 @@ struct NodeTask
 {
   std::weak_ptr<GraphTask> base_;
   std::shared_ptr<Node> fn_;
+
   // This buffer serves as an implicit "addition" node for all of the
   // gradients flowing here.  Once all the dependencies are finished, we
   // use the contents of this buffer to run the function.
   InputBuffer inputs_;
+
   // When worker receives a task with isShutdownTask = true, it will immediately
   // exit. The engine sends a shutdown task to every queue upon its destruction.
   bool isShutdownTask_;
@@ -209,42 +214,51 @@ struct TORCH_API Engine
       std::shared_ptr<GraphTask>& graph_task,
       Node* func,
       InputBuffer& inputs);
+
   ReadyQueue& ready_queue(at::Device device);
   ReadyQueue& ready_queue_by_index(int device_index);
   void start_threads();
   virtual void thread_init(int device);
+
   virtual void thread_on_exception(
       std::shared_ptr<GraphTask>& graph_task,
       const std::shared_ptr<Node>& fn,
       std::exception& e);
+
   virtual void thread_main(
       const std::shared_ptr<GraphTask>& task,
       bool reentrant_thread);
+
   void reentrant_thread_init();
   void add_thread_pool_task(const std::weak_ptr<GraphTask>& graph_task);
   void set_device(int device);
 
   // Ensures ready_queues_ are initialized only once
   std::once_flag start_threads_flag_;
+
   // Safe to read ready_queues_ without synchronization after intialization
   std::vector<std::shared_ptr<ReadyQueue>> ready_queues_;
   std::vector<std::function<void()>> final_callbacks_;
+
   // To protect reads and writes to final_callbacks_
   std::mutex post_callbacks_lock_;
+
   // How many nested reentrant calls are allowed until a new thread is used
   int max_recursion_depth_;
 
   struct ThreadPoolShared 
-  {
-    // Data structures used by the threads for executing reentrant backwards
+  { // Data structures used by the threads for executing reentrant backwards
     // tasks. See Note [Reentrant backwards]
     // Number of available threads for processing new GraphTasks.
     unsigned int num_workers_;
+
     // The threads will wait on work_ to be notified of GraphTasks
     std::condition_variable work_;
+    
     // To protect reads and writes to graphtask_queue_ and num_workers_
     // and for synchronizing creating new threads when needed
     std::mutex mutex_;
+
     // Workers will process the GraphTasks added to this queue. A GraphTask is
     // allocated inside Engine::execute and lives for the duration of execute
     std::queue<std::weak_ptr<GraphTask>> graphtasks_queue_;
@@ -261,6 +275,7 @@ struct TORCH_API Engine
  private:
   variable_list graph_task_exec_post_processing(
       const std::shared_ptr<GraphTask>& graph_task);
+
   void mark_graph_task_completed(std::shared_ptr<GraphTask>& graph_task);
 };
 

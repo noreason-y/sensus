@@ -81,7 +81,8 @@ void InputBuffer::add(
   {
     const auto on_producer = opt_producer_stream && device_of(var) == opt_producer_stream->device();
     const auto on_consumer = opt_consumer_stream && device_of(var) == opt_consumer_stream->device();
-    if (on_producer && on_consumer) {
+    if (on_producer && on_consumer) 
+    {
       // (2a)
       opt_accumulate_stream = opt_consumer_stream;
       if (opt_accumulate_stream != opt_producer_stream) 

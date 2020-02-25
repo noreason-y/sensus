@@ -6,7 +6,9 @@
 #include <c10/util/flat_hash_map.h>
 #include <vector>
 
-namespace torch { namespace autograd {
+// namespace torch { namespace autograd {
+namespace torch::autograd 
+{
 
 TORCH_API variable_list _wrap_outputs(
   const variable_list& input_vars,
@@ -346,4 +348,5 @@ void CppNode<T>::set_ctx_grad_fn(const std::shared_ptr<Node> &node)
   ctx_.grad_fn_ = node;
 }
 
-}} // namespace torch::autograd
+// }} // namespace torch::autograd
+} // namespace torch::autograd

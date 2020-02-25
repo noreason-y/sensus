@@ -13,7 +13,9 @@
 #include <utility>
 #include <vector>
 
-namespace torch { namespace autograd {
+// namespace torch { namespace autograd {
+namespace torch::autograd 
+{
 
 /// Monotonically incrementing (thread local!) counter to supply sequence
 /// numbers.
